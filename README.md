@@ -1,6 +1,6 @@
 ## Changelog:
  - 12/01/2020 :
-    * Added folder 'my_tutku_memories_nodejs'
+    * Added folder 'my_turku_memories_nodejs'
         * NodeJS/Express server countaining all the following APIs:
         * -> SignUp
         * -> Login
