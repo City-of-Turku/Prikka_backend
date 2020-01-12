@@ -1,14 +1,14 @@
 ## Changelog:
  - 12/01/2020 :
     * Added folder 'my_tutku_memories_nodejs'
-    * NodeJS/Express server countaining all the following APIs:
-    * -> SignUp
-    * -> Login
-    * -> Logout
-    * -> Forgot Password
-    * -> Add memories
-    * -> Remove Memories
-    * -> Add/Remove favorite
+        * NodeJS/Express server countaining all the following APIs:
+        * -> SignUp
+        * -> Login
+        * -> Logout
+        * -> Forgot Password
+        * -> Add memories
+        * -> Remove Memories
+        * -> Add/Remove favorite
 
     * Used with mongoDB for Dev.
 
