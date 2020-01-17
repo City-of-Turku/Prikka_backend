@@ -8,6 +8,7 @@
 const express = require('express');
 const passport = require('passport');
 const Strategy = require('passport-google-oauth20').Strategy;
+const Fstrategy = require('passport-facebook').Fstrategy;
 const router = express.Router();
 
 passport.use(new Strategy({
@@ -48,3 +49,9 @@ router.get('/return',
 });
 
 module.exports = router;
+
+passport.use(new.Fstrategy({
+    clientID: process.env[FACEBOOK_APP_ID],
+    clientSecret: process.env[FACEBOOK_APP_SECRET],
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
+}))
