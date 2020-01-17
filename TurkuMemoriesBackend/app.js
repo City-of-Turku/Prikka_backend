@@ -8,6 +8,7 @@ const bodyParser = require('body-parser').urlencoded({ extended: true });
 const expressSession = require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true });
 const passport = require('passport');
 const Strategy = require('passport-google-oauth20').Strategy;
+const Sequelize = require('sequelize');
 
 const loginRouter = require('./routes/login')
 const indexRouter = require('./routes/index');
@@ -20,7 +21,23 @@ if (env.error) {
   process.exit(1);
 }
 
-// database setup here?
+// database setup here
+const sequelize = new Sequelize(
+  process.env['DATABASE_USER'],
+  process.env['DATABASE_USER'],
+  process.env['DATABASE_PASSWORD'], {
+  host: 'remotemysql.com', 
+  dialect: 'mysql'
+});
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection OK');
+  })
+  .catch(err => {
+    console.error('No connection');
+  })
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
