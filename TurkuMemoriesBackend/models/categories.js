@@ -1,22 +1,12 @@
 const sequelize = require("sequelize");
 
 
-const Memories = sequelize.define('memories', {
-    MemoryID: {
+const Memories = sequelize.define('categories', {
+    CategoryID: {
         type: DataTypes.INT,
-        allowNull: false
-    },
-    title: {
-        type: DataTypes.TEXT,
         allowNull: false,
-        validate: {
-            min: {
-                args: 4,
-                msg: "Title has to be minimum 4 characters"
-            }
-            }
     },
-    MemoryContent: {
+    CategoryName: {
         type: DataTypes.TEXT,
         allowNull: false,
         validate: {

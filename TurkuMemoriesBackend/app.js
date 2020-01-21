@@ -32,10 +32,10 @@ const sequelize = new Sequelize(
 sequelize
   .authenticate()
   .then(() => {
-    console.log('Connection OK');
+    console.log('Connection to database OK');
   })
   .catch(err => {
-    console.error('No connection');
+    console.error('No connection to database');
   })
 
 
