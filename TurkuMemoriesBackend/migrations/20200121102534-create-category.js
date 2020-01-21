@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
@@ -25,3 +25,4 @@ module.exports = {
     return queryInterface.dropTable('Categories');
   }
 };
+

@@ -9,10 +9,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INT,
       allowNull: false
     },
-    CategoryId: {
-      type: DataTypes.INT,
-      allowNull: false
-    },
     MemoryContent: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -45,15 +41,13 @@ module.exports = (sequelize, DataTypes) => {
   });
   Memory.associate = function(models) {
     // associations can be defined here
+    Memory.belongsTo(models.Category,{
+      foreignkey: 'categoryId',
+    });
     Memory.belongsTo(models.User,{
       foreignkey: 'userId',
-      as: 'user',
     });
-    /*Memory.hasOne(models.Category,{
-      foreignkey: 'categoryId',
-      as: 'category',
-    });*/
-
+    
   };
   return Memory;
 };

@@ -2,33 +2,50 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Memories', {
-      Title: {
+      title: {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      MemoryId: {
+      id: { 
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      MemoryContent: {
+      categoryId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Categories',
+          key: 'id',
+          as: 'categoryId',
+        },
+      },
+      userId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Users',
+          key: 'id',
+          as: 'userId',
+        },
+      },
+      
+      content: {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      MemoryDate: {
+      date: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      MemoryPublished: {
+      published: {
         type: Sequelize.DATE,
         allowNull: false
       },
-      MemoryLatitude: {
+      latitude: {
         type: Sequelize.FLOAT,
         allowNull: false
       },
-      MemoryLongtitude: {
+      longtitude: {
         type: Sequelize.FLOAT,
         allowNull: false
       }
