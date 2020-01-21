@@ -1,24 +1,10 @@
-const sequelize = require("sequelize");
-
-
-const users = sequelize.define('users', {
-    UserName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    UserEmail: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    UserPasswordHash: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-        min: {
-            args: 6,
-            msg: "Password must be more than 6 characters"
-        }
-        }
-    }   
-
-})
+'use strict';
+module.exports = (sequelize, DataTypes) => {
+  const User = sequelize.define('User', {
+    name: DataTypes.STRING
+  }, {});
+  User.associate = function(models) {
+    // associations can be defined here
+  };
+  return User;
+};
