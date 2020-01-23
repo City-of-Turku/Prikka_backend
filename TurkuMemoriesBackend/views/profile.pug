@@ -1,0 +1,7 @@
+p Hello #{user.displayName}
+p Logged in with #{user.provider}
+
+//-- look at all the shit we are getting
+script(type='text/javascript').
+    var x = !{JSON.stringify(user)}
+    console.log(x);

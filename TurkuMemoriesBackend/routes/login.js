@@ -7,14 +7,24 @@
  */
 const express = require('express');
 const passport = require('passport');
-const Strategy = require('passport-google-oauth20').Strategy;
-const Fstrategy = require('passport-facebook').Fstrategy;
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const router = express.Router();
 
-passport.use(new Strategy({
+passport.use(new GoogleStrategy({
     clientID: process.env['GOOGLE_CLIENT_ID'],
     clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
-    callbackURL: '/return'
+    callbackURL: '/api/login/google-return'
+    },
+    function (accessToken, refreshToken, profile, cb) {
+        return cb(null, profile);
+    }
+    ));
+
+passport.use(new FacebookStrategy({
+    clientID: process.env['FACEBOOK_APP_ID'],
+    clientSecret: process.env['FACEBOOK_APP_SECRET'],
+    callbackURL: '/api/login/facebook-return'
     },
     function (accessToken, refreshToken, profile, cb) {
         return cb(null, profile);
@@ -38,20 +48,34 @@ passport.serializeUser(function(user, cb) {
     cb(null, obj);
 });
 
+router.get('/',
+    function(req, res) {
+        res.render('login')
+    });
+
 router.get('/google',
     passport.authenticate('google', { scope: ['profile'] })
 );
 
-router.get('/return', 
-  passport.authenticate('google', { failureRedirect: '/' }),
+router.get('/google-return', 
+  passport.authenticate('google', { failureRedirect: '/error' }),
   function(req, res) {
-    res.redirect('/');
+    res.redirect('/api/login/profile');
+});
+
+router.get('/facebook',
+    passport.authenticate('facebook')
+);
+
+router.get('/facebook-return',
+    passport.authenticate('facebook', { failureRedirect: '/error'}),
+    function(req, res) {
+        res.redirect('/api/login/profile');
+});
+
+router.get('/profile',
+    function(req, res) {
+        res.render('profile', {user: req.user});
 });
 
 module.exports = router;
-
-passport.use(new.Fstrategy({
-    clientID: process.env[FACEBOOK_APP_ID],
-    clientSecret: process.env[FACEBOOK_APP_SECRET],
-    callbackURL: "http://localhost:3000/auth/facebook/callback"
-}))
