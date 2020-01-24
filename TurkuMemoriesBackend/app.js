@@ -7,7 +7,6 @@ const logger = require('morgan');
 const bodyParser = require('body-parser').urlencoded({ extended: true });
 const expressSession = require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true });
 const passport = require('passport');
-const Strategy = require('passport-google-oauth20').Strategy;
 const Sequelize = require('sequelize');
 
 const loginRouter = require('./routes/login')
