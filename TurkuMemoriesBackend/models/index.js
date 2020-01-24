@@ -1,18 +1,24 @@
 'use strict';
 
+const env = require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
 const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
 const db = {};
 
 let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+if (!env.error) {
+  sequelize = new Sequelize(
+    process.env['DATABASE_USER'],
+    process.env['DATABASE_USER'],
+    process.env['DATABASE_PASSWORD'], {
+    host: 'remotemysql.com', 
+    dialect: 'mysql'
+  });
+  console.log('Sequelize ok.')
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  console.log('Sequelize error.');
 }
 
 fs
