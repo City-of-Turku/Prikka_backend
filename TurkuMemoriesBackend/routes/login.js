@@ -9,6 +9,7 @@ const express = require('express');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn('/')
 const router = express.Router();
 
 // const User = require('../models/user');
@@ -82,6 +83,10 @@ router.get('/facebook-return',
 router.get('/profile',
     function(req, res) {
         res.render('profile', {user: req.user});
+});
+
+router.get('/secret', ensureLoggedIn, async (req, res) => {
+    res.render('secret');
 });
 
 module.exports = router;
