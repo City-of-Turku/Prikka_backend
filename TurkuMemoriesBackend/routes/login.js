@@ -80,13 +80,17 @@ router.get('/facebook-return',
         res.redirect('/api/login/profile');
 });
 
-router.get('/profile',
-    function(req, res) {
+router.get('/profile', ensureLoggedIn, (req, res) => {
         res.render('profile', {user: req.user});
 });
 
 router.get('/secret', ensureLoggedIn, async (req, res) => {
     res.render('secret');
+});
+
+router.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/')
 });
 
 module.exports = router;
