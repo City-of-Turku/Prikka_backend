@@ -1,15 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Memory = sequelize.define('Memory', {
-    Title: {
+    title: {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    MemoryId: {
-      type: DataTypes.INT,
-      allowNull: false
-    },
-    MemoryContent: {
+    content: {
       type: DataTypes.TEXT,
       allowNull: false,
       validate: {
@@ -19,33 +15,35 @@ module.exports = (sequelize, DataTypes) => {
           }
           }
   },
-  MemoryDate: {
+  date: {
       type: DataTypes.DATE,
       allowNull: false
   },
-  MemoryPublished: {
+  published: {
       type: DataTypes.DATE,
-      defaultValue: sequelize.NOW
+      defaultValue: sequelize.DATE
   },
-  MemoryLatitude: {
+  latitude: {
       type: DataTypes.FLOAT,
       allowNull: false
   },
-  MemoryLongtitude: {
+  longtitude: {
       type: DataTypes.FLOAT,
       allowNull: false
   }
 
 
 
+  },{
+    timestamps: false
   });
   Memory.associate = function(models) {
     // associations can be defined here
     Memory.belongsTo(models.Category,{
-      foreignkey: 'categoryId',
+      foreignkey: 'CategoryId',
     });
     Memory.belongsTo(models.User,{
-      foreignkey: 'userId',
+      foreignkey: 'UserId',
     });
     
   };
