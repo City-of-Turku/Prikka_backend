@@ -3,54 +3,43 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 const router = express.Router();
-//const db = require('../models/index.js');
+const Memory = require('../models').Memory;
+const HttpStatus = require('http-status-codes');
+
 
 router.get('/all',
   function(req, res) {
-    //db.post.findAll().then( (result) => res.json(result) )
-    res.render('index', '');
+  Memory.findAll()
+    .then(memories => {
+      res
+      .status(HttpStatus.OK)
+      .send(memories);
+    });
 });
 
-
-/*module.exports = (app, db) => {
-    app.get( "/memories", (req, res) =>
-      db.post.findAll().then( (result) => res.json(result) )
-    );
-  
-    app.get( "/memory/:id", (req, res) =>
-      db.post.findByPk(req.params.id).then( (result) => res.json(result))
-    );
-  
-    app.post("/memory", (req, res) => 
-      db.post.create({
-        title: req.body.title,
-        content: req.body.content
-      }).then( (result) => res.json(result) )
-    );
-
-    router.get('/profile',
-    function(req, res) {
-        res.render('profile', {user: req.user});
+router.get('/:id',
+  function(req, res) {
+    Memory.findByPk(req.params.id)
+      .then(memory => {
+        res
+        .status(HttpStatus.OK)
+        .send(memory);
+      }).catch(function (err){ res
+        .status(HttpStatus.NOT_FOUND)
+        .send(`Memory not found.`)}); 
 });
-  
-    app.put( "/memory/:id", (req, res) =>
-      db.post.update({
-        title: req.body.title,
-        content: req.body.content
-      },
-      {
-        where: {
-          id: req.params.id
-        }
-      }).then( (result) => res.json(result) )
-    );
-  
-    app.delete( "/memory/:id", (req, res) =>
-      db.post.destroy({
-        where: {
-          id: req.params.id
-        }
-      }).then( (result) => res.json(result) )
-    );
-  }*/
+
+router.post('/create',
+  function(req,res) {
+    console.log(req.body);
+    let memoryBody = req.body;
+    Memory.create(memoryBody)
+    .then(res
+      .status(HttpStatus.CREATED)
+      .send(memoryBody)).catch(function (err){ res
+        .status(HttpStatus.BAD_REQUEST)
+        .send(`Error while creating a memory.`)});
+  });
+
   module.exports = router;
+  
