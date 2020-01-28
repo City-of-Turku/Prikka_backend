@@ -3,5 +3,15 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+  header
+    ul
+      li
+        a(href="/api/login") Login  
+      li  
+        a(href="/api/login/logout") Logout
+      li
+        a(href="/api/login/profile") Profile
+      li
+        a(href="/") Index
   body
     block content
