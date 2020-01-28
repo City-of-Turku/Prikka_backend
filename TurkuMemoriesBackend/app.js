@@ -1,6 +1,7 @@
 const env = require('dotenv').config();
 const createError = require('http-errors');
 const express = require('express');
+const flash = require('connect-flash');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -13,6 +14,8 @@ const loginRouter = require('./routes/login')
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
+const registerRouter = require('./routes/register');
+
 
 const app = express();
 
@@ -54,6 +57,7 @@ app.use(expressSession);
 // session.
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 
 
 app.use(logger('dev'));
@@ -65,6 +69,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/login', loginRouter);
+app.use('/api/register', registerRouter);
 app.use('/api/memory', memoryRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

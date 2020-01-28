@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Category = sequelize.define('Category', {
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
   });
   Category.associate = function(models) {

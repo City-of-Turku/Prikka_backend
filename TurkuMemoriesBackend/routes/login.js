@@ -12,6 +12,7 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn('/')
 const router = express.Router();
 
+
 // const User = require('../models/user');
 
 passport.use(new GoogleStrategy({
