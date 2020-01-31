@@ -5,6 +5,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    }},{
+      timestamps: false
   });
   Category.associate = function(models) {
     // associations can be defined here
