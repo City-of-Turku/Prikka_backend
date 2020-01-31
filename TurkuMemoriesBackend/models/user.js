@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
           msg: 'This username is taken'
         }
     },
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
     email: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -33,6 +39,15 @@ module.exports = (sequelize, DataTypes) => {
           }
           }
     },
+    googleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    facebookId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    }},{
+      timestamps: false
   });
 
   User.associate = function(models) {
@@ -41,6 +56,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'id',
         as: 'memories',
     });
+    User.hasMany(models.Report),{
+        foreignKey: 'id',
+        as: 'reportsPosted'
+    }
   };
   return User;
 };

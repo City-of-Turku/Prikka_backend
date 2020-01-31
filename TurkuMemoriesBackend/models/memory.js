@@ -9,43 +9,57 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false,
       validate: {
-          min: {
-              args: 4,
-              msg: "Content has to be minimum 4 characters"
-          }
-          }
-  },
-  date: {
+        min: {
+          args: 4,
+          msg: "Content has to be minimum 4 characters"
+        }
+      }
+    },
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    categoryId: {
+      type: DataTypes.INTEGER
+    },
+    date: {
       type: DataTypes.DATE,
       allowNull: false
-  },
-  published: {
+    },
+    published: {
       type: DataTypes.DATE,
       defaultValue: sequelize.DATE
-  },
-  latitude: {
+    },
+    latitude: {
       type: DataTypes.FLOAT,
       allowNull: false
-  },
-  longtitude: {
+    },
+    longtitude: {
       type: DataTypes.FLOAT,
       allowNull: false
-  }
-
-
-
-  },{
-    timestamps: false
+    }}, {
+      timestamps: false
   });
-  Memory.associate = function(models) {
+  Memory.associate = function (models) {
     // associations can be defined here
-    Memory.belongsTo(models.Category,{
-      foreignkey: 'CategoryId',
+    Memory.belongsTo(models.Category, {
+      foreignkey: 'categoryId',
     });
-    Memory.belongsTo(models.User,{
-      foreignkey: 'UserId',
+    Memory.belongsTo(models.User, {
+      foreignkey: 'userId',
     });
-    
-  };
+    Memory.hasMany(models.Report, {
+      foreignKey: 'id',
+      as: 'reports',
+    });
+
+  }
   return Memory;
 };
+
