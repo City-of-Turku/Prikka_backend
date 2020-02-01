@@ -10,12 +10,13 @@ const expressSession = require('express-session')({ secret: 'keyboard cat', resa
 const passport = require('passport');
 const Sequelize = require('sequelize');
 
-const loginRouter = require('./routes/login')
+require('./config/auth.js')(passport);
+
+const loginRouter = require('./routes/login');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
 const registerRouter = require('./routes/register');
-
 
 const app = express();
 
