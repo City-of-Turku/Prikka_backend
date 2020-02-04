@@ -10,7 +10,9 @@ const expressSession = require('express-session')({ secret: 'keyboard cat', resa
 const passport = require('passport');
 const Sequelize = require('sequelize');
 
-require('./config/auth.js')(passport);
+const models = require('./models');
+
+require('./config/auth.js')(passport, models.user);
 
 const loginRouter = require('./routes/login');
 const indexRouter = require('./routes/index');
@@ -60,6 +62,16 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+/*models.sequelize.sync().then(function() {
+ 
+  console.log('Nice! Database looks fine')
+
+
+}).catch(function(err) {
+
+  console.log(err, "Something went wrong with the Database Update!")
+
+});*/
 
 app.use(logger('dev'));
 app.use(express.json());

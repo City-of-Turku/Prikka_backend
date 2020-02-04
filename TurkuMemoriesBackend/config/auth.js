@@ -59,41 +59,66 @@ module.exports = (passport) => {
 		)
 	);
 
-	const localRegister = new LocalStrategy(
-		{
-			usernameField: 'email',
-			passwordField: 'passwordhash',
-			passReqToCallback: true
-		},
-		(req, email, passwordhash, next) => {
-			User.findOne({ email: email }, (err, user) => {
-				//If error
-				if (err) {
-					console.log('Register : error');
-					return next(err);
-				}
+    var User = user;
+  
+    passport.use('local-register', new LocalStrategy(
+ 
+        {
+            usernameField: 'email',
+            passwordField: 'password',
+            passReqToCallback: true // allows us to pass back the entire request to the callback
+        },
 
-				//If found
-				if (user != null) {
-					console.log('Register : already exist');
-					return next(new Error('User already exists, please log in.'));
-				}
-
-				//Else, Create new user
-				const hashedPw = bcrypt.hashSync(passwordhash, 8);
-
-				User.create({ email: email, passwordhash: hashedPw }, (err, user) => {
-					if (err) {
-						console.log('Register : Error creating');
-						return next(err);
-					}
-
-					console.log('Register : Success');
-					next(null, user);
-				});
-			});
-		}
-	);
-
-	passport.use('localRegister', localRegister);
-};
+        function(req, email, password, done) {
+ 
+            var generateHash = function(password) {
+                return bCrypt.hashSync(password, bCrypt.genSaltSync(8), null);
+            };
+ 
+            User.findOne({
+                where: {
+                    email: email
+                }
+            }).then(function(user) {
+                if (user) {
+ 
+                    return done(null, false, {
+                        message: 'That email is already taken'
+                    });
+                } else
+                {
+                    var userPassword = generateHash(password);
+ 
+                    var data =
+ 
+                        {
+                            email: email,
+                            password: userPassword, 
+                            name: req.body.name
+                        };
+ 
+                    User.create(data).then(function(newUser, created) {
+ 
+                        if (!newUser) {
+ 
+                            return done(null, false);
+ 
+                        }
+ 
+                        if (newUser) {
+ 
+                            return done(null, newUser);
+ 
+                        }
+ 
+                    });
+ 
+                }
+ 
+            });
+ 
+        }
+ 
+    ));
+ 
+}
