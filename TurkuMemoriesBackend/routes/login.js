@@ -20,14 +20,16 @@ router.get('/', function(req, res) {
 // authentication via google
 router.get('/google', passport.authenticate('google', { scope: [ 'profile' ] }));
 
-router.get('/google-return', passport.authenticate('google', { failureRedirect: '/error' }), function(req, res) {
-});
+// router.get('/google-return', passport.authenticate('google', { failureRedirect: '/error' }), function(req, res) {
+// });
 
-router.get( '/google-return',
-	passport.authenticate('google', {
-		successRedirect: '/profile',
-		failureRedirect: '/error'
-}));
+router.get('/google-return', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+	// Successful authentication, redirect home.
+	console.log("callback")
+    res.redirect('/api/login/profile');
+  });
 // authentication via facebook
 router.get('/facebook', passport.authenticate('facebook'));
 
