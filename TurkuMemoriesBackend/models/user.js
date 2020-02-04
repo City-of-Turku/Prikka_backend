@@ -4,9 +4,6 @@ module.exports = (sequelize, DataTypes) => {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          isName:true,
-        },
         unique: {
           args: true,
           msg: 'This username is taken'
