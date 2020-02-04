@@ -53,8 +53,20 @@ module.exports = (passport) => {
 				clientSecret: process.env['FACEBOOK_APP_SECRET'],
 				callbackURL: '/api/login/facebook-return'
 			},
-			function(accessToken, refreshToken, profile, cb) {
-				return cb(null, profile);
+			function(accessToken, refreshToken, profile, done) {
+				// passport callback function
+				console.log("FACEBOOK",profile);
+				User.findOrCreate({
+					where: { facebookId: profile.id },
+					defaults: {
+						facebookId: profile.id,
+						name: profile.displayName,
+						email: 'asdo@asd.fiasdf',
+						passwordhash: 'asdasda'
+					}
+				}).then(([ user, created, error ]) => {
+					return done(null, user);
+				});
 			}
 		)
 	);
