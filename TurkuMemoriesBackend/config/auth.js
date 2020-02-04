@@ -10,15 +10,14 @@ const User = require('../models').User;
 
 module.exports = (passport) => {
 	passport.serializeUser((user, done) => {
-		console.log('USER SER.', user);
 		done(null, user.dataValues.id);
 	});
 
 	passport.deserializeUser((id, done) => {
-		User.findByPk(id, (err, user) => {
-			console.log();
-			done(err, user);
-		});
+		User.findByPk(id).then((user, err) => {
+            console.log(user);
+            done(err, user)
+        });
 	});
 
 	passport.use(
@@ -41,8 +40,6 @@ module.exports = (passport) => {
 						passwordhash: 'asdasda'
 					}
 				}).then(([ user, created, error ]) => {
-					console.log('then');
-					console.log('USER', user.dataValues);
 					return done(null, user);
 				});
 			}
