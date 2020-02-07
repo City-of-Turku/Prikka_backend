@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-
 import {
   Menu,
   Dropdown,
   MenuItem,
   Image,
 } from 'semantic-ui-react'
+
+import LoginModal from './LoginModal'
 
 const languageOptions = [
   { key: 'EN', text: 'EN', value: 'EN' },
@@ -28,8 +29,8 @@ export class NavigationBar extends Component {
         <Menu secondary pointing>
           <MenuItem>
             <Image
-              src="../../public/mtm_logo.png"
-              size="mini"
+              src="/images/mtm_font_only.svg"
+              size="small"
             />
           </MenuItem>
           <Menu.Item
@@ -46,14 +47,17 @@ export class NavigationBar extends Component {
             content="My Memories"
             onClick={this.handleItemClick}
           />
+          <Menu.Item
+            key="2"
+            active={activeItem === 'About Us'}
+            name="About Us"
+            content="About Us"
+            onClick={this.handleItemClick}
+          />
           <Menu.Menu position="right">
-            <Menu.Item
-              key="3"
-              active={activeItem === 'Login'}
-              name="Login"
-              content="Login"
-              onClick={this.handleItemClick}
-            />
+            <Menu.Item>
+              <LoginModal />
+            </Menu.Item>
             <Menu.Item>
               <Dropdown
                 pointing="false"
