@@ -16,8 +16,9 @@ export class MapComponent extends Component {
           attribution: '© <a href="https://www.mapbox.com/feedback/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }),
       ]
-    });
-    this.marker = L.marker([60.45, 22.26]).addTo(this.map);
+    }).on('click', function(ev) {
+      console.log(ev.latlng); // Get coordinates for markers example
+    })
   }
   render() {
     return (
