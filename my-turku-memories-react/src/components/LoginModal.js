@@ -1,19 +1,43 @@
 import React, { Component } from 'react'
-import {
-  Button,
-  Header,
-  Modal,
-  Icon,
-  Form,
-  Container,
-} from 'semantic-ui-react'
+
+import { Modal, Button, Container } from 'semantic-ui-react'
+import { SignInContent } from './SignInContent'
+import { SignUpContent } from './SignUpContent'
 
 export class LoginModal extends Component {
+  constructor(props) {
+    super(props)
+    this.handleChangeContent = this.handleChangeContent.bind(
+      this,
+    )
+  }
+
   state = { toDisplay: 'SignIn' }
 
-  handleChangeContent() {}
+  handleChangeContent(event, value) {
+    event.preventDefault()
+    this.setState({ toDisplay: value })
+    console.log(this.state.toDisplay)
+  }
 
   render() {
+    const toDisplay = this.state.toDisplay
+    let content
+
+    if (this.state.toDisplay === 'SignIn') {
+      content = (
+        <SignInContent
+          callbackFn={this.handleChangeContent}
+        />
+      )
+    } else {
+      content = (
+        <SignUpContent
+          callbackFn={this.handleChangeContent}
+        />
+      )
+    }
+
     return (
       <Modal
         size="mini"
@@ -25,64 +49,7 @@ export class LoginModal extends Component {
             Welcome to My Turku Memories
           </Container>
         </Modal.Header>
-        <Modal.Content>
-          {/* 
-      <Image
-        wrapped
-        size="medium"
-        src="/images/avatar/large/rachel.png"
-      /> */}
-
-          <Modal.Description>
-            <Container textAlign="center">
-              <Header>Login</Header>
-
-              <Form>
-                <Button
-                  icon
-                  labelPosition="left"
-                  color="blue"
-                >
-                  <Icon name="facebook" />
-                  Facebook
-                </Button>
-                <Button
-                  icon
-                  labelPosition="left"
-                  color="red"
-                >
-                  <Icon name="google" />
-                  Google
-                </Button>
-              </Form>
-              <Form>
-                <Form.Group grouped>
-                  <Form.Input
-                    iconPosition="left"
-                    label="Email"
-                    placeholder="Email"
-                  >
-                    <Icon name="at" />
-                    <input />
-                  </Form.Input>
-                  <br />
-                  <br />
-                  <Form.Input
-                    iconPosition="left"
-                    label="Password"
-                    placeholder="Password"
-                    type="password"
-                  >
-                    <Icon name="lock" />
-                    <input />
-                  </Form.Input>
-                  <Form.Button>Log In</Form.Button>
-                  <a href="">Forgotten your password ?</a>
-                </Form.Group>
-              </Form>
-            </Container>
-          </Modal.Description>
-        </Modal.Content>
+        {content}
       </Modal>
     )
   }

@@ -48,7 +48,7 @@ export class NavigationBar extends Component {
             onClick={this.handleItemClick}
           />
           <Menu.Item
-            key="2"
+            key="3"
             active={activeItem === 'About Us'}
             name="About Us"
             content="About Us"
@@ -60,7 +60,6 @@ export class NavigationBar extends Component {
             </Menu.Item>
             <Menu.Item>
               <Dropdown
-                pointing="false"
                 button
                 className="icon"
                 floating
