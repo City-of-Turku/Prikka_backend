@@ -71,7 +71,7 @@ module.exports = (passport) => {
 		)
 	);
 
-    var User = user;
+    //var User = user;
   
     passport.use('local-register', new LocalStrategy(
  
