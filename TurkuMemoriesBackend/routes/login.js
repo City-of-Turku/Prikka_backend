@@ -39,8 +39,6 @@ router.get('/facebook-return', passport.authenticate('facebook', { failureRedire
 
 // move this someplace else
 router.get('/profile', ensureLoggedIn, (req, res) => {
-	console.log("saatana",req.user.dataValues)
-	console.log("perkele",req.session)
 	res.render('profile', { user: req.user.dataValues });
 });
 // debug remove later please
@@ -52,5 +50,15 @@ router.get('/logout', (req, res) => {
 	req.logout();
 	res.redirect('/');
 });
+
+router.get('/login', (res, req) => {
+	res.render('login');
+});
+
+router.post('/login', passport.authenticate('local-signin', {
+	successRedirect: '/',
+	failureRedirect: '/login'
+	}
+));
 
 module.exports = router;
