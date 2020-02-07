@@ -8,6 +8,10 @@ const passport = require('passport');
  * (post) : '/'
  * Register the user, then redirect to /account page
  */
+router.get('/', (req, res) => {
+    res.render('register');
+});
+
 router.post('/', passport.authenticate('localRegister', {
     successRedirect: '/',
     failureRedirect: '/register',

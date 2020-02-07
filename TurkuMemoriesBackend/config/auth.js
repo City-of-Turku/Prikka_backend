@@ -131,6 +131,47 @@ module.exports = (passport) => {
  
         }
  
-    ));
+	));
+	
+	passport.use('local-signin', new LocalStrategy(
+		{
+			usernameField: 'email',
+			passwordField: 'password',
+			passReqToCallback: true
+		},
+
+		function(req, email, password, done) {
+			var User = user;
+			var isValidPassword = function(userpass, password) {
+				return bCrypt.compareSync(password, userpass);
+			}
+			User.findOne({
+				where: {
+					email: email
+				}
+			}).then(function(user){
+				if(!user) {
+					return done(null, false, {
+						message : 'Email does not exist.'
+					});
+				}
+
+				if(!isValidPassword(user.password, password)) {
+					return done(null, false, {
+						message: 'Incorrect password.'
+					});
+				}
+
+				var userInfo = user.get();
+				return done(null, userInfo);
+			}).catch(function(err) {
+				console.log("Error:", err);
+
+				return done(null, false, {
+					message: 'Sometthing went wrong with your signin.'
+				});
+			});
+		}
+	));
  
 }
