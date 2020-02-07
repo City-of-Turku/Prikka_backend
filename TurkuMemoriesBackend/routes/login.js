@@ -39,8 +39,6 @@ router.get('/facebook-return', passport.authenticate('facebook', { failureRedire
 
 // move this someplace else
 router.get('/profile', ensureLoggedIn, (req, res) => {
-	console.log("saatana",req.user.dataValues)
-	console.log("perkele",req.session)
 	res.render('profile', { user: req.user.dataValues });
 });
 // debug remove later please
