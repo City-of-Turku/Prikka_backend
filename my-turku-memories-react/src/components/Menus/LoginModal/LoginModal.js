@@ -21,7 +21,6 @@ export class LoginModal extends Component {
   }
 
   render() {
-    const toDisplay = this.state.toDisplay
     let content
 
     if (this.state.toDisplay === 'SignIn') {

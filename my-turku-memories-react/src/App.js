@@ -2,17 +2,15 @@ import React from 'react'
 //import logo from './logo.svg'
 import './App.css'
 import 'semantic-ui-css/semantic.min.css'
-import { NavigationBar } from './components/NavigationBar'
-import { FilterBar } from './components/FilterBar'
-import { MapComponent } from './components/MapComponent'
+import { MenuBars } from './components/Menus/MenuBars'
+import { MapContainer } from './components/MapZone/MapContainer'
 
 function App() {
   return (
     <div className="App">
       <header>
-        <NavigationBar />
-        <FilterBar />
-        <MapComponent />
+        <MenuBars />
+        <MapContainer />
       </header>
     </div>
   )
