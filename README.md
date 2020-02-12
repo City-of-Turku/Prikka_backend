@@ -1,7 +1,7 @@
 ## Backend Setup
 
 - Clone this repo
-- `cd TurkuMemories/TurkuMemoriesBackend`
+- `cd TurkuMemories`
 - `npm install`
 - `npm start`  
   Make sure you have nodemon installed `npm install nodemon -g`
