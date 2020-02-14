@@ -1,18 +1,14 @@
 const express = require('express')
-const passport = require('passport')
-const GoogleStrategy = require('passport-google-oauth20')
-  .Strategy
-const FacebookStrategy = require('passport-facebook')
-  .Strategy
-const router = express.Router()
-const Memory = require('../models').Memory
-const Report = require('../models').Report
+const Memory = require('../models/Db').Memory
+const Report = require('../models/Db').Report
 const HttpStatus = require('http-status-codes')
+
+export const memoryRouter = express.Router()
 
 /**
  * API (POST) : createMemory
  */
-router.post('/memory', function(req, res) {
+memoryRouter.post('/memories', function(req, res) {
   let memoryBody = req.body
   Memory.create(memoryBody)
     .then(memory => {
@@ -29,7 +25,7 @@ router.post('/memory', function(req, res) {
 /**
  * API (GET) : getMemoryById
  */
-router.get('/memory/:id', function(req, res) {
+memoryRouter.get('/memories/:id', function(req, res) {
   Memory.findByPk(req.params.id)
     .then(memory => {
       res.status(HttpStatus.OK).send(memory)
@@ -42,7 +38,7 @@ router.get('/memory/:id', function(req, res) {
 /**
  * API (PUT) : updateMemoryById
  */
-router.put('/memory/:id', function(req, res) {
+memoryRouter.put('/memories/:id', function(req, res) {
   Memory.findByPk(req.params.id)
     .then(memory => {
       let memoryBody = req.body
@@ -65,7 +61,7 @@ router.put('/memory/:id', function(req, res) {
 /**
  * API (GET) : getAllMemories
  */
-router.get('/memories', function(req, res) {
+memoryRouter.get('/memories', function(req, res) {
   Memory.findAll()
     .then(memories => {
       res.status(HttpStatus.OK).send(memories)
@@ -86,7 +82,7 @@ router.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemoryReport
  */
-router.post('/report', async function(req, res) {
+memoryRouter.post('/reports', async function(req, res) {
   let reportBody = req.body
   Report.findOne({
     where: {
@@ -121,7 +117,7 @@ router.post('/report', async function(req, res) {
 /**
  * API (GET) : getMemoryReportsById
  */
-router.get('/reports/:id', function(req, res) {
+memoryRouter.get('/reports/:id', function(req, res) {
   Report.findAndCountAll({
     where: {
       memoryId: req.params.id,
@@ -139,5 +135,3 @@ router.get('/reports/:id', function(req, res) {
       res.send(err)
     })
 })
-
-module.exports = router

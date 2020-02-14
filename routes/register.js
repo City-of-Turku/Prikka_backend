@@ -1,17 +1,18 @@
 const express = require('express')
-const router = express.Router()
 const passport = require('passport')
+
+export const registerRouter = express.Router()
 
 /* --- ENDPOINTS --- */
 /**
  * (post) : '/'
  * Register the user, then redirect to /account page
  */
-router.get('/', (req, res) => {
+registerRouter.get('/', (req, res) => {
   res.render('register')
 })
 
-router.post(
+registerRouter.post(
   '/',
   passport.authenticate('local-register', {
     successRedirect: '/',
@@ -22,4 +23,3 @@ router.post(
     console.log('callback')
   },
 )
-module.exports = router

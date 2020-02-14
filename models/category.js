@@ -1,25 +1,20 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Category = sequelize.define('Category', {
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      autoIncrement: true
-    }},{
-      timestamps: false
-  });
-  Category.associate = function(models) {
-    // associations can be defined here
-    Category.hasMany(models.Memory,{
-      foreignKey: 'id',
-      as: 'memories',
-  });
-  };
-  return Category;
-};
+import { Model } from 'sequelize'
 
+export class Category extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+      },
+      {
+        sequelize, // We need to pass the connection instance
+        modelName: 'Category', // We need to choose the model name
+        timestamps: true,
+        updatedAt: false, // we don't want updatedAt
+      },
+    )
+  }
+}

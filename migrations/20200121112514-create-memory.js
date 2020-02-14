@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable('Memories', {
@@ -6,11 +6,11 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: false,
       },
-      id: { 
+      id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       categoryId: {
         type: Sequelize.INTEGER,
@@ -28,30 +28,26 @@ module.exports = {
           as: 'userId',
         },
       },
-      
+
       content: {
         allowNull: false,
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       date: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       published: {
         type: Sequelize.DATE,
-        allowNull: false
+        allowNull: false,
       },
-      latitude: {
-        type: Sequelize.FLOAT,
-        allowNull: false
+      coordinates: {
+        type: Sequelize.GEOMETRY('POINT'),
+        allowNull: false,
       },
-      longtitude: {
-        type: Sequelize.FLOAT,
-        allowNull: false
-      }
-    });
+    })
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('Memories');
-  }
-};
+    return queryInterface.dropTable('Memories')
+  },
+}

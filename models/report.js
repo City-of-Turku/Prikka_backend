@@ -1,35 +1,33 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Report = sequelize.define('Report', {
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    id: {
-        type:DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    memoryId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    }},{
-        timestamps: false
-  });
+import { Model } from 'sequelize'
 
-  Report.associate = function(models) {
-    // associations can be defined here
-    Report.belongsTo(models.User,{
-        foreignKey: 'userId',
-    });
-    Report.belongsTo(models.Memory,{
-        foreignKey: 'memoryId'
-    });
-  };
-  return Report;
-};
+export class Report extends Model {
+  static init(sequelize, DataTypes) {
+    return super.init(
+      {
+        title: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        description: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+      },
 
+      {
+        sequelize,
+        modelName: 'Report',
+        timestamps: true,
+        updatedAt: false, // we don't want updatedAt
+      },
+    )
+  }
+  static associate(models) {
+    this.hasOne(models.Memory, {
+      foreignKey: {
+        type: DataTypes.UUID,
+      },
+    })
+    models.Memory.belongsTo(this)
+  }
+}
