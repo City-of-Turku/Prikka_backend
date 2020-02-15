@@ -43,7 +43,7 @@ const Memory = sequelize.define(
         },
       },
     },
-    coordinates: {
+    position: {
       type: DataTypes.GEOMETRY('POINT'),
       allowNull: false,
     },

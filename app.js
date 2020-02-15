@@ -14,6 +14,7 @@ const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const passport = require('passport')
 const logger = require('morgan')
+var cors = require('cors')
 
 //const db & models
 const models = require('./models/index')
@@ -90,7 +91,7 @@ app.use(
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(flash())
-
+app.use(cors())
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
