@@ -1,9 +1,9 @@
 const express = require('express')
-const Memory = require('../models/Db').Memory
-const Report = require('../models/Db').Report
+const Memory = require('../models/Memory')
+const Report = require('../models/Report')
 const HttpStatus = require('http-status-codes')
 
-export const memoryRouter = express.Router()
+const memoryRouter = express.Router()
 
 /**
  * API (POST) : createMemory
@@ -135,3 +135,5 @@ memoryRouter.get('/reports/:id', function(req, res) {
       res.send(err)
     })
 })
+
+module.exports = memoryRouter

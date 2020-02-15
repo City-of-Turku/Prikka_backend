@@ -3,29 +3,30 @@
  * --------------------- */
 
 // Import libraries
-import env from 'dotenv/config'
+const env = require('dotenv/config')
 
-import bodyParser from 'body-parser'
-import createError from 'http-errors'
-import express from 'express'
-import flash from 'connect-flash'
-import path from 'path'
-import cookieParser from 'cookie-parser'
-import expressSession from 'express-session'
-import passport from 'passport'
+const bodyParser = require('body-parser')
+const createError = require('http-errors')
+const express = require('express')
+const flash = require('connect-flash')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const session = require('express-session')
+const passport = require('passport')
 const logger = require('morgan')
 
-//import db & models /!\ DO NOT CHANGE ORDER /!\
-import { db } from './models/Db'
+//const db & models
+const models = require('./models/index')
+const db = require('./config/db').sequelize
 
-require('./config/auth.js')(passport, db.modUser)
+require('./config/auth.js')(passport, models.User)
 
 //Import routes
-import { loginRouter } from './routes/login'
-import { indexRouter } from './routes/index'
-import { usersRouter } from './routes/users'
-import { memoryRouter } from './routes/memory'
-import { registerRouter } from './routes/register'
+const loginRouter = require('./routes/login')
+const indexRouter = require('./routes/index')
+const usersRouter = require('./routes/users')
+const memoryRouter = require('./routes/memory')
+const registerRouter = require('./routes/register')
 
 /* ---------------------
  *         MAIN
@@ -39,11 +40,10 @@ if (env.error) {
 }
 
 // database setup here
-db.sequelize
-  .authenticate()
+db.authenticate()
   .then(() => {
     console.log(
-      'Connection has been established successfully.',
+      'Connection has been established successfully.\n',
     )
   })
   .catch(err => {
@@ -56,16 +56,12 @@ db.sequelize
  * User.sync({ alter: true }) - This checks what is the current state of the table in the database (which columns it has, what are their data types, etc), and then performs the necessary changes in the table to make it match the model.
  */
 
-db.sequelize
-  .sync({ alter: true })
-  .then(function() {
-    console.log('Nice! Database looks fine')
+db.sync({ alter: true })
+  .then(() => {
+    console.log('Tables successfully synced.\n')
   })
-  .catch(function(err) {
-    console.log(
-      err,
-      'Something went wrong with the Database Update!',
-    )
+  .catch(() => {
+    console.error('Error syncing tables:', err, '\n')
   })
 
 // view engine setup
@@ -81,9 +77,15 @@ app.use(
     extended: false,
   }),
 )
-app.use(expressSession)
+app.use(
+  session({
+    secret: 'slfo0jr4u7djhe7e83_dhg',
+    resave: true,
+    saveUninitialized: true,
+  }),
+)
 
-// Initialize Passport and restore authentication state, if any, from the
+// Initialize Passport and restore authentication state, if any,= require (the
 // session.
 app.use(passport.initialize())
 app.use(passport.session())

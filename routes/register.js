@@ -1,7 +1,7 @@
 const express = require('express')
 const passport = require('passport')
 
-export const registerRouter = express.Router()
+const registerRouter = express.Router()
 
 /* --- ENDPOINTS --- */
 /**
@@ -23,3 +23,5 @@ registerRouter.post(
     console.log('callback')
   },
 )
+
+module.exports = registerRouter

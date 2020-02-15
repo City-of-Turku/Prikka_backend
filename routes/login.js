@@ -5,13 +5,13 @@
  *
  *  (post) : '/'
  */
-import express from 'express'
-import passport from 'passport'
+const express = require('express')
+const passport = require('passport')
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(
   '/api/auth-management/login',
 )
 
-export const loginRouter = express.Router()
+const loginRouter = express.Router()
 
 // login page
 loginRouter.get('/', function(req, res) {
@@ -83,3 +83,5 @@ loginRouter.post(
     failureRedirect: '/login',
   }),
 )
+
+module.exports = loginRouter

@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20')
 const FacebookStrategy = require('passport-facebook')
   .Strategy
 
-const User = require('../models/Db').User
+const User = require('../models/User')
 
 // function to be called while there is a new sign/signup
 // We are using passport local signin/signup strategies for our app
@@ -41,7 +41,7 @@ module.exports = passport => {
           where: { googleId: profile.id },
           defaults: {
             googleId: profile.id,
-            name: profile.displayName,
+            username: profile.displayName,
             email: 'asdo@asd.fi',
             passwordhash: 'asdasda',
           },
@@ -68,7 +68,7 @@ module.exports = passport => {
           where: { facebookId: profile.id },
           defaults: {
             facebookId: profile.id,
-            name: profile.displayName,
+            username: profile.displayName,
             email: 'asdo@asd.fiasdf',
             passwordhash: 'asdasda',
           },
@@ -116,7 +116,7 @@ module.exports = passport => {
             var data = {
               email: email,
               passwordhash: userPassword,
-              name: req.body.name,
+              username: req.body.username,
             }
             console.log(data)
             console.log('making a new user since not found')
