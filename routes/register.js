@@ -1,5 +1,6 @@
 const express = require('express')
 const passport = require('passport')
+const HttpStatus = require('http-status-codes')
 
 const registerRouter = express.Router()
 
@@ -21,6 +22,7 @@ registerRouter.post(
   }),
   function(req, res) {
     console.log('callback')
+    res.send()
   },
 )
 

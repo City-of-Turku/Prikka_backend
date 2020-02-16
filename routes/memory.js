@@ -14,7 +14,7 @@ memoryRouter.post('/memories', function(req, res) {
     .then(memory => {
       res.status(HttpStatus.CREATED).send(memory)
     })
-    .catch(function(err) {
+    .catch(err => {
       console.log(err)
       res
         .status(HttpStatus.BAD_REQUEST)
@@ -62,7 +62,9 @@ memoryRouter.put('/memories/:id', function(req, res) {
  * API (GET) : getAllMemories
  */
 memoryRouter.get('/memories', function(req, res) {
-  Memory.findAll()
+  Memory.findAll({
+    order: [['id', 'DESC']],
+  })
     .then(memories => {
       res.status(HttpStatus.OK).send(memories)
     })

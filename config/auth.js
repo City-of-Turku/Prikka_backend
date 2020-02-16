@@ -119,21 +119,26 @@ module.exports = passport => {
               username: req.body.username,
             }
             console.log(data)
-            console.log('making a new user since not found')
-            User.create(data).then(function(
-              newUser,
-              created,
-            ) {
-              if (!newUser) {
-                console.log('error with creating new user')
-                return done(null, false)
-              }
+            console.log(
+              'trying to make a new user since not found',
+            )
+            User.create(data)
+              .then(function(newUser, created) {
+                if (!newUser) {
+                  console.log(
+                    'error with creating new user',
+                  )
+                  return done(null, false)
+                }
 
-              if (newUser) {
-                console.log('new user was created')
-                return done(null, newUser)
-              }
-            })
+                if (newUser) {
+                  console.log('new user was created')
+                  return done(null, newUser)
+                }
+              })
+              .catch(err => {
+                return done(err)
+              })
           }
         })
       },
