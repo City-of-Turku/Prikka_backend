@@ -1,6 +1,6 @@
 const express = require('express')
-const Memory = require('../models/Memory')
-const Report = require('../models/Report')
+const Memory = require('../models/memory')
+const Report = require('../models/report')
 const HttpStatus = require('http-status-codes')
 
 const memoryRouter = express.Router()

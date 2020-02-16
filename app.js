@@ -61,7 +61,7 @@ db.sync({ alter: true })
   .then(() => {
     console.log('Tables successfully synced.\n')
   })
-  .catch(() => {
+  .catch((err) => {
     console.error('Error syncing tables:', err, '\n')
   })
 

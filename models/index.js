@@ -1,8 +1,8 @@
 const sequelize = require('../config/db').sequelize
-const User = require('./User')
-const Category = require('./Category')
-const Memory = require('./Memory')
-const Report = require('./Report')
+const User = require('./user')
+const Category = require('./category')
+const Memory = require('./memory')
+const Report = require('./report')
 
 const models = {
   User: User,
