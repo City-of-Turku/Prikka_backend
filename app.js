@@ -7,6 +7,8 @@ const env = require('dotenv/config')
 
 const bodyParser = require('body-parser')
 const createError = require('http-errors')
+const HttpStatus = require('http-status-codes')
+
 const express = require('express')
 const flash = require('connect-flash')
 const path = require('path')
@@ -20,7 +22,7 @@ var cors = require('cors')
 const models = require('./models/index')
 const db = require('./config/db').sequelize
 
-require('./config/auth.js')(passport, models.User)
+require('./config/auth.js')(passport)
 
 //Import routes
 const loginRouter = require('./routes/login')
@@ -61,7 +63,7 @@ db.sync({ alter: true })
   .then(() => {
     console.log('Tables successfully synced.\n')
   })
-  .catch((err) => {
+  .catch(err => {
     console.error('Error syncing tables:', err, '\n')
   })
 
@@ -104,20 +106,23 @@ app.use('/api/auth-management/login', loginRouter)
 app.use('/api/auth-management/register', registerRouter)
 app.use('/api/memory-management', memoryRouter)
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404))
+app.use((req, res, next) => {
+  next(createError(HttpStatus.NOT_FOUND, 'Not found'))
 })
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message
   res.locals.error =
     req.app.get('env') === 'development' ? err : {}
 
   // render the error page
-  res.status(err.status || 500)
-  res.render('error')
+  res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR)
+  //res.render('error')
+
+  res.send()
+  console.log()
 })
 
 module.exports = app

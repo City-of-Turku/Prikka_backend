@@ -5,23 +5,35 @@ const GoogleStrategy = require('passport-google-oauth20')
 const FacebookStrategy = require('passport-facebook')
   .Strategy
 
-const User = require('../models/User')
+const models = require('../models/index')
+const createError = require('http-errors')
+const HttpStatus = require('http-status-codes')
 
 // function to be called while there is a new sign/signup
 // We are using passport local signin/signup strategies for our app
 
 module.exports = passport => {
-  passport.serializeUser((user, done) => {
+  passport.serializeUser((user, next) => {
     console.log('serializeUser')
-    done(null, user.dataValues.id)
+    next(null, user)
   })
 
-  passport.deserializeUser((id, done) => {
-    console.log('deSerialieUser')
-    User.findByPk(id).then((user, err) => {
-      console.log(user)
-      done(err, user)
-    })
+  passport.deserializeUser((id, next) => {
+    console.log('deserializeUser')
+    models.User.findByPk(id)
+      .then(user => {
+        if (user) {
+          //found
+          console.log('User found')
+        } else {
+          console.log('User not found')
+        }
+        next(null, user)
+      })
+      .catch(err => {
+        console.log(err)
+        next(err)
+      })
   })
 
   //Google
@@ -34,10 +46,10 @@ module.exports = passport => {
         callbackURL:
           '/api/auth-management/login/google-return',
       },
-      function(accessToken, refreshToken, profile, done) {
+      function(accessToken, refreshToken, profile, next) {
         // passport callback function
         console.log(profile)
-        User.findOrCreate({
+        models.User.findOrCreate({
           where: { googleId: profile.id },
           defaults: {
             googleId: profile.id,
@@ -45,9 +57,13 @@ module.exports = passport => {
             email: 'asdo@asd.fi',
             passwordhash: 'asdasda',
           },
-        }).then(([user, created, error]) => {
-          return done(null, user)
         })
+          .then(user => {
+            return next(null, user)
+          })
+          .catch(err => {
+            return next(err)
+          })
       },
     ),
   )
@@ -61,10 +77,10 @@ module.exports = passport => {
         callbackURL:
           '/api/auth-management/login/facebook-return',
       },
-      function(accessToken, refreshToken, profile, done) {
+      function(accessToken, refreshToken, profile, next) {
         // passport callback function
         console.log('FACEBOOK', profile)
-        User.findOrCreate({
+        models.User.findOrCreate({
           where: { facebookId: profile.id },
           defaults: {
             facebookId: profile.id,
@@ -72,9 +88,13 @@ module.exports = passport => {
             email: 'asdo@asd.fiasdf',
             passwordhash: 'asdasda',
           },
-        }).then(([user, created, error]) => {
-          return done(null, user)
         })
+          .then(user => {
+            return next(null, user)
+          })
+          .catch(err => {
+            return next(err)
+          })
       },
     ),
   )
@@ -82,66 +102,63 @@ module.exports = passport => {
   //var User = user;
 
   //Local Register
+  //TODO : check if username already exists
   passport.use(
     'local-register',
     new LocalStrategy(
       {
-        usernameField: 'email',
+        //get params from request
+        usernameField: 'email', //do not change name 'usernameField', it's tied to library
         passwordField: 'password',
         passReqToCallback: true, // allows us to pass back the entire request to the callback
-      },
-      function(req, email, password, done) {
-        console.log('callback function start')
-        var generateHash = function(password) {
-          console.log('making hash')
-          return bcrypt.hashSync(
-            password,
-            bcrypt.genSaltSync(8),
-            null,
-          )
-        }
+      }, //care, order of params matters, same as up there
+      (req, email, password, next) => {
+        //Check If exists
         console.log('looking for user in DB')
-        User.findOne({
+        models.User.findOne({
           where: {
             email: email,
           },
-        }).then(function(user) {
+        }).then(user => {
+          // If exists
           if (user) {
-            return done(null, false, {
-              message: 'That email is already taken',
-            })
-          } else {
-            var userPassword = generateHash(password)
-
-            var data = {
-              email: email,
-              passwordhash: userPassword,
-              username: req.body.username,
-            }
-            console.log(data)
+            return next(
+              createError(
+                HttpStatus.CONFLICT,
+                'That email is already taken',
+              ),
+            )
+          }
+          // If doesn't, create new user
+          else {
             console.log(
               'trying to make a new user since not found',
             )
-            User.create(data)
-              .then(function(newUser, created) {
-                if (!newUser) {
+            const hashedPw = bcrypt.hashSync(password, 10)
+
+            models.User.create({
+              email: email,
+              username: req.body.username,
+              passwordhash: hashedPw,
+            })
+
+              .then(newUser => {
+                //if successful
+                if (newUser) {
+                  console.log('new user was created')
+                } else {
                   console.log(
                     'error with creating new user',
                   )
-                  return done(null, false)
                 }
-
-                if (newUser) {
-                  console.log('new user was created')
-                  return done(null, newUser)
-                }
+                return next(null, newUser)
               })
               .catch(err => {
-                return done(err)
+                return next(err)
               })
-          }
+          } //end user create
         })
-      },
+      }, //end callback localstrategy
     ),
   )
 
@@ -150,44 +167,38 @@ module.exports = passport => {
     'local-signin',
     new LocalStrategy(
       {
-        usernameField: 'email',
+        //get params from request
+        usernameField: 'email', //do not change name 'usernameField', it's tied to library
         passwordField: 'password',
         passReqToCallback: true,
-      },
+      }, //care, order of params matters, same as up there
       (req, email, password, next) => {
-        User.findOne({
+        console.log('Sign-in: findOne')
+        models.User.findOne({
           where: {
             email: email,
           },
-        }).then((user, err) => {
-          console.log('user', user)
-          console.log('error', err)
-          if (err) {
-            console.log('Login :error')
-            return next(err)
+        }).then(user => {
+          //found
+          if (user) {
+            console.log('Login : sucess')
+            return next(null, newUser)
           }
-
           //If not found
-          if (user == null) {
-            console.log('Login : not found')
-            return next(new Error('User not found'))
+          else if (user == null) {
+            console.log('Login : user not found')
+            return next(null, newUser)
           }
-
           //If wrong password
-          if (
+          else if (
             bcrypt.compareSync(
               password,
               user.dataValues.passwordhash,
             ) == false
           ) {
             console.log('Login :Wrong Password')
-
-            return next(new Error('Incorrect password'))
+            return next(null, null)
           }
-
-          //Else success
-          console.log('Login: success')
-          return next(null, user)
         })
       },
     ),
