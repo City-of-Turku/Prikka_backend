@@ -59,6 +59,7 @@ db.authenticate()
  * User.sync({ alter: true }) - This checks what is the current state of the table in the database (which columns it has, what are their data types, etc), and then performs the necessary changes in the table to make it match the model.
  */
 
+//TODO : issue, db.sync create new foreign keys each time
 db.sync({ alter: true })
   .then(() => {
     console.log('Tables successfully synced.\n')
@@ -112,16 +113,26 @@ app.use((req, res, next) => {
 
 // error handler
 app.use((err, req, res, next) => {
-  // set locals, only providing error in development
+  //set locals for dev
   res.locals.message = err.message
   res.locals.error =
     req.app.get('env') === 'development' ? err : {}
 
-  // render the error page
+  //set status for response
   res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR)
-  //res.render('error')
+  // render the error page
 
-  res.send()
+  //res.render('error') //deactivated render, if not, the whole html page is send back as a response
+
+  //create response body
+  const data = {
+    message: err.message,
+    user: req.body,
+  }
+
+  //send response ()
+  res.send(data)
+
   console.log()
 })
 

@@ -25,10 +25,12 @@ module.exports = passport => {
         if (user) {
           //found
           console.log('User found')
+          console.log(user.dataValues)
+          next(null, user.dataValues)
         } else {
           console.log('User not found')
+          next(null, null)
         }
-        next(null, user)
       })
       .catch(err => {
         console.log(err)
@@ -59,7 +61,7 @@ module.exports = passport => {
           },
         })
           .then(user => {
-            return next(null, user)
+            return next(null, user.dataValues)
           })
           .catch(err => {
             return next(err)
@@ -90,7 +92,7 @@ module.exports = passport => {
           },
         })
           .then(user => {
-            return next(null, user)
+            return next(null, user.dataValues)
           })
           .catch(err => {
             return next(err)
@@ -122,6 +124,10 @@ module.exports = passport => {
         }).then(user => {
           // If exists
           if (user) {
+            console.log(
+              'Cant register, user already exists',
+            )
+            console.log(user.dataValues)
             return next(
               createError(
                 HttpStatus.CONFLICT,
@@ -146,12 +152,14 @@ module.exports = passport => {
                 //if successful
                 if (newUser) {
                   console.log('new user was created')
+                  console.log(newUser.dataValues)
+                  return next(null, newUser.dataValues)
                 } else {
                   console.log(
                     'error with creating new user',
                   )
+                  return next(null, null)
                 }
-                return next(null, newUser)
               })
               .catch(err => {
                 return next(err)
@@ -182,12 +190,13 @@ module.exports = passport => {
           //found
           if (user) {
             console.log('Login : sucess')
-            return next(null, newUser)
+            console.log(user.dataValues)
+            return next(null, user.dataValues)
           }
           //If not found
           else if (user == null) {
             console.log('Login : user not found')
-            return next(null, newUser)
+            return next(null, null)
           }
           //If wrong password
           else if (

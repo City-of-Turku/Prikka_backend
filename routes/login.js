@@ -15,7 +15,8 @@ const loginRouter = express.Router()
 
 // login page
 loginRouter.get('/', function(req, res) {
-  res.render('login')
+  //res.render('login')
+  res.send()
 })
 
 // authentication via google
@@ -56,16 +57,14 @@ loginRouter.get(
 
 // move this someplace else
 loginRouter.get('/profile', ensureLoggedIn, (req, res) => {
-  res.render('profile', { user: req.user.dataValues })
+  //res.render('profile', { user: req.user.dataValues })
+  res.send()
 })
 // debug remove later please
-loginRouter.get(
-  '/secret',
-  ensureLoggedIn,
-  async (req, res) => {
-    res.render('secret')
-  },
-)
+loginRouter.get('/secret', ensureLoggedIn, (req, res) => {
+  //res.render('secret')
+  res.send()
+})
 // logout --- deauthenticate
 loginRouter.get('/logout', (req, res) => {
   req.logout()
@@ -73,7 +72,8 @@ loginRouter.get('/logout', (req, res) => {
 })
 
 loginRouter.get('/login', (res, req) => {
-  res.render('login')
+  //res.render('login')
+  res.send()
 })
 
 loginRouter.post(
