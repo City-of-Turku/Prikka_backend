@@ -1,17 +1,19 @@
 const express = require('express')
-const router = express.Router()
 const passport = require('passport')
+const HttpStatus = require('http-status-codes')
+
+const registerRouter = express.Router()
 
 /* --- ENDPOINTS --- */
 /**
  * (post) : '/'
  * Register the user, then redirect to /account page
  */
-router.get('/', (req, res) => {
+registerRouter.get('/', (req, res) => {
   res.render('register')
 })
 
-router.post(
+registerRouter.post(
   '/',
   passport.authenticate('local-register', {
     successRedirect: '/',
@@ -20,6 +22,8 @@ router.post(
   }),
   function(req, res) {
     console.log('callback')
+    res.send()
   },
 )
-module.exports = router
+
+module.exports = registerRouter

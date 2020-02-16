@@ -1,24 +1,26 @@
 {
   "development": {
-    "username": "r8wLyCHpbB",
-    "password": "R9DQlzG6b9",
-    "database": "r8wLyCHpbB",
-    "host": "remotemysql.com",
-    "dialect": "mysql"
+    "username": "root",
+    "password": "",
+    "database": "myturkumemories_db",
+    "options": {
+      "host": "localhost",
+      "port": 3306,
+      "dialect": "mysql"
+    }
   },
   "test": {
-    "username": "r8wLyCHpbB",
-    "password": "R9DQlzG6b9",
-    "database": "r8wLyCHpbB",
-    "host": "remotemysql.com",
+    "username": "root",
+    "password": "",
+    "database": "myturkumemory_db",
+    "host": "localhost",
     "dialect": "mysql"
   },
   "production": {
-    "username": "r8wLyCHpbB",
-    "password": "R9DQlzG6b9",
-    "database": "r8wLyCHpbB",
-    "host": "remotemysql.com",
+    "username": "root",
+    "password": "",
+    "database": "myturkumemory_db",
+    "host": "localhost",
     "dialect": "mysql"
   }
 }
-

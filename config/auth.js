@@ -5,7 +5,7 @@ const GoogleStrategy = require('passport-google-oauth20')
 const FacebookStrategy = require('passport-facebook')
   .Strategy
 
-const User = require('../models').User
+const User = require('../models/User')
 
 // function to be called while there is a new sign/signup
 // We are using passport local signin/signup strategies for our app
@@ -31,7 +31,8 @@ module.exports = passport => {
       {
         clientID: process.env['GOOGLE_CLIENT_ID'],
         clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
-        callbackURL: '/api/login/google-return',
+        callbackURL:
+          '/api/auth-management/login/google-return',
       },
       function(accessToken, refreshToken, profile, done) {
         // passport callback function
@@ -40,7 +41,7 @@ module.exports = passport => {
           where: { googleId: profile.id },
           defaults: {
             googleId: profile.id,
-            name: profile.displayName,
+            username: profile.displayName,
             email: 'asdo@asd.fi',
             passwordhash: 'asdasda',
           },
@@ -57,7 +58,8 @@ module.exports = passport => {
       {
         clientID: process.env['FACEBOOK_APP_ID'],
         clientSecret: process.env['FACEBOOK_APP_SECRET'],
-        callbackURL: '/api/login/facebook-return',
+        callbackURL:
+          '/api/auth-management/login/facebook-return',
       },
       function(accessToken, refreshToken, profile, done) {
         // passport callback function
@@ -66,7 +68,7 @@ module.exports = passport => {
           where: { facebookId: profile.id },
           defaults: {
             facebookId: profile.id,
-            name: profile.displayName,
+            username: profile.displayName,
             email: 'asdo@asd.fiasdf',
             passwordhash: 'asdasda',
           },
@@ -114,24 +116,29 @@ module.exports = passport => {
             var data = {
               email: email,
               passwordhash: userPassword,
-              name: req.body.name,
+              username: req.body.username,
             }
             console.log(data)
-            console.log('making a new user since not found')
-            User.create(data).then(function(
-              newUser,
-              created,
-            ) {
-              if (!newUser) {
-                console.log('error with creating new user')
-                return done(null, false)
-              }
+            console.log(
+              'trying to make a new user since not found',
+            )
+            User.create(data)
+              .then(function(newUser, created) {
+                if (!newUser) {
+                  console.log(
+                    'error with creating new user',
+                  )
+                  return done(null, false)
+                }
 
-              if (newUser) {
-                console.log('new user was created')
-                return done(null, newUser)
-              }
-            })
+                if (newUser) {
+                  console.log('new user was created')
+                  return done(null, newUser)
+                }
+              })
+              .catch(err => {
+                return done(err)
+              })
           }
         })
       },
