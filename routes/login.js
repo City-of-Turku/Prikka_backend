@@ -77,7 +77,7 @@ loginRouter.get('/login', (res, req) => {
 })
 
 loginRouter.post(
-  '/login',
+  '/',
   passport.authenticate('local-signin', {
     successRedirect: '/',
     failureRedirect: '/login',

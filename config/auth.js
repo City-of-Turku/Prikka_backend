@@ -170,7 +170,7 @@ module.exports = passport => {
     ),
   )
 
-  //Local login
+  //Local login //TODO: Update strategies, suggest to bruteforce
   passport.use(
     'local-signin',
     new LocalStrategy(
@@ -187,18 +187,12 @@ module.exports = passport => {
             email: email,
           },
         }).then(user => {
-          //found
-          if (user) {
-            console.log('Login : sucess')
-            console.log(user.dataValues)
-            return next(null, user.dataValues)
-          }
           //If not found
-          else if (user == null) {
+          if (user == null) {
             console.log('Login : user not found')
             return next(null, null)
           }
-          //If wrong password
+          //If found, check password
           else if (
             bcrypt.compareSync(
               password,
@@ -207,6 +201,11 @@ module.exports = passport => {
           ) {
             console.log('Login :Wrong Password')
             return next(null, null)
+          } else {
+            //found
+            console.log('Login : sucess')
+            console.log(user.dataValues)
+            return next(null, user.dataValues)
           }
         })
       },
