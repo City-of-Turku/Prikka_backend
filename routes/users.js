@@ -1,10 +1,10 @@
-const express = require('express')
+const express = require('express');
 
-const usersRouter = express.Router()
+const usersRouter = express.Router();
 
 /* GET users listing. */
 usersRouter.get('/', function(req, res, next) {
-  res.send('respond with a resource')
-})
+    res.send('respond with a resource');
+});
 
-module.exports = usersRouter
+module.exports = usersRouter;

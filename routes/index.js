@@ -1,11 +1,11 @@
-const express = require('express')
+const express = require('express');
 
-const indexRouter = express.Router()
+const indexRouter = express.Router();
 
 /* GET home page. */
 indexRouter.get('/', function(req, res, next) {
-  //res.render('index', { title: 'Express' })
-  res.send()
-})
+    //res.render('index', { title: 'Express' })
+    res.send();
+});
 
-module.exports = indexRouter
+module.exports = indexRouter;
