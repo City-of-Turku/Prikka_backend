@@ -10,7 +10,8 @@ const registerRouter = express.Router()
  * Register the user, then redirect to /account page
  */
 registerRouter.get('/', (req, res) => {
-  res.render('register')
+  //res.render('register')
+  res.send()
 })
 
 registerRouter.post(
