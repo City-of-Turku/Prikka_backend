@@ -21,7 +21,6 @@ module.exports = (passport) => {
 				secretOrKey: process.env['JWT_SECRET']
 			},
 			function(jwtPayload, next) {
-				//find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
 				models.User
 					.findOne({
 						where: {
@@ -29,10 +28,11 @@ module.exports = (passport) => {
 						}
 					})
 					.then((user) => {
+                        console.log("jokuvaan", user.dataValues)
 						return next(null, user.dataValues);
 					})
 					.catch((err) => {
-						return next(err);
+						return next(err, false);
 					});
 			}
 		)
@@ -71,23 +71,27 @@ module.exports = (passport) => {
 			{
 				clientID: process.env['GOOGLE_CLIENT_ID'],
 				clientSecret: process.env['GOOGLE_CLIENT_SECRET'],
-				callbackURL: '/api/auth-management/login/google-return'
+                callbackURL: '/api/auth-management/login/google-return',
+                passReqToCallback: true
 			},
-			function(accessToken, refreshToken, profile, next) {
+			function(req, accessToken, refreshToken, profile, next) {
 				// passport callback function
-				console.log(profile);
+				console.log('GOOGLE', profile);
 				models.User
 					.findOrCreate({
 						where: { googleId: profile.id },
 						defaults: {
 							googleId: profile.id,
 							username: profile.displayName,
-							email: 'asdo@asd.fi',
+							email: profile.emails[0].value,
 							passwordhash: 'asdasda'
 						}
 					})
 					.then((user) => {
-						return next(null, user.dataValues);
+                        console.log('uuser',user)
+                        console.log('req.uuuser', user[0].dataValues)
+                        req.user = user[0].dataValues;
+						return next(null, user[0].dataValues);
 					})
 					.catch((err) => {
 						return next(err);
@@ -102,9 +106,10 @@ module.exports = (passport) => {
 			{
 				clientID: process.env['FACEBOOK_APP_ID'],
 				clientSecret: process.env['FACEBOOK_APP_SECRET'],
-				callbackURL: '/api/auth-management/login/facebook-return'
+                callbackURL: '/api/auth-management/login/facebook-return',
+                passReqToCallback: true
 			},
-			function(accessToken, refreshToken, profile, next) {
+			function(req, accessToken, refreshToken, profile, next) {
 				// passport callback function
 				console.log('FACEBOOK', profile);
 				models.User
@@ -118,7 +123,9 @@ module.exports = (passport) => {
 						}
 					})
 					.then((user) => {
-						return next(null, user.dataValues);
+                        console.log('req.uuuser', user[0].dataValues)
+                        req.user = user[0].dataValues;
+						return next(null, user[0].dataValues);
 					})
 					.catch((err) => {
 						return next(err);
@@ -214,7 +221,8 @@ module.exports = (passport) => {
 						} else {
 							//found
 							console.log('Login : sucess');
-							console.log(user.dataValues);
+                            console.log(user.dataValues);
+                            req.user = user.dataValues
 							return next(null, user.dataValues);
 						}
 					});
