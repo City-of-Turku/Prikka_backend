@@ -28,7 +28,6 @@ module.exports = (passport) => {
 						}
 					})
 					.then((user) => {
-                        console.log("jokuvaan", user.dataValues)
 						return next(null, user.dataValues);
 					})
 					.catch((err) => {
@@ -88,8 +87,6 @@ module.exports = (passport) => {
 						}
 					})
 					.then((user) => {
-                        console.log('uuser',user)
-                        console.log('req.uuuser', user[0].dataValues)
                         req.user = user[0].dataValues;
 						return next(null, user[0].dataValues);
 					})
@@ -123,11 +120,11 @@ module.exports = (passport) => {
 						}
 					})
 					.then((user) => {
-                        console.log('req.uuuser', user[0].dataValues)
                         req.user = user[0].dataValues;
 						return next(null, user[0].dataValues);
 					})
 					.catch((err) => {
+						console.log(err)
 						return next(err);
 					});
 			}
