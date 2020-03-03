@@ -34,7 +34,6 @@ loginRouter.get(
 loginRouter.get('/google-return', (req, res, next) => {
     passport.authenticate('google', { session: false }, (err, user, info) => {
         // Successful authentication
-        console.log('leeeeeel', req.user)
         if (err || _.isEmpty(req.user)) {
             console.log(err)
             return res.status(400).json({
@@ -62,9 +61,8 @@ loginRouter.get(
 	'/facebook-return', (req, res, next) => {
     passport.authenticate('facebook', { session: false }, (err, user, info) => {
         // Successful authentication
-        console.log('leeeeeel', req.user)
         if (err || _.isEmpty(req.user)) {
-            console.log("looool")
+            console.log(err)
             return res.status(400).json({
                 message: 'Something is not right',
                 user: user

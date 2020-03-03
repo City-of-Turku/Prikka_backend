@@ -122,7 +122,6 @@ memoryRouter.get('/reports/:id', function(req, res) {
         },
     })
         .then(reports => {
-            console.log('fadfas');
             if (reports.count != 0) {
                 res.status(HttpStatus.OK).send(reports);
             } else {
