@@ -8,6 +8,7 @@ usersRouter.get('/', function(req, res, next) {
 });
 
 usersRouter.get('/profile', function(req, res, next) {
+    // use this route to test auth tokens
 	res.send(_.omit(req.user, [ 'passwordhash', 'googleId', 'facebookId' ]));
 });
 
