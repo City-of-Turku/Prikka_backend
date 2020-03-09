@@ -29,6 +29,7 @@ const loginRouter = require('./routes/login');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
+const categoryRouter = require('./routes/category');
 const registerRouter = require('./routes/register');
 
 /* ---------------------
@@ -58,7 +59,7 @@ db.authenticate()
  */
 
 //TODO : issue, db.sync create new foreign keys each time
-db.sync({ alter: true })
+db.sync()
     .then(() => {
         console.log('Tables successfully synced.\n');
     })
@@ -104,6 +105,8 @@ app.use('/users', usersRouter);
 app.use('/api/auth-management/login', loginRouter);
 app.use('/api/auth-management/register', registerRouter);
 app.use('/api/memory-management', memoryRouter);
+app.use('/api/category-management', categoryRouter);
+
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     next(createError(HttpStatus.NOT_FOUND, 'Not found'));
