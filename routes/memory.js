@@ -1,6 +1,7 @@
 const express = require('express');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
+const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(
     '/api/auth-management/login'
@@ -92,44 +93,51 @@ memoryRouter.get('/memories', function(req, res) {
 });
 
 /**
- * API (GET) : getMemoriesByTag
- */
-
-//TODO
-
-/**
  * API (POST) : createMemoryReport
  */
 memoryRouter.post('/reports', async function(req, res) {
     let reportBody = req.body;
-    Report.findOne({
+    Memory.findOne({
         where: {
-            memoryId: req.body.memoryId,
-            userId: req.body.userId,
+            id: req.body.memoryId,
         },
     })
-        .then(report => {
-            if (report == null) {
-                // If existing report on memory is not found, new report is created.
-                Report.create(reportBody)
-                    .then(report => {
-                        res.status(HttpStatus.CREATED).send(report);
-                    })
-                    .catch(function(err) {
-                        console.log(err);
-                        res;
-                        throw 'Error creating memory.';
-                    });
-            } else {
-                // If existing report on memory is found.
-                res;
-                throw 'Memory already reported by user.';
-            }
+    .then(memory => {
+        console.log("MEMORY FOUND")
+        Report.findOne({
+            where: {
+                memoryId: req.body.memoryId,
+                userId: req.body.userId,
+            },
         })
-        .catch(function(err) {
-            console.log(err);
-            res.status(HttpStatus.BAD_REQUEST).send(err);
-        });
+            .then(report => {
+                if (report == null) {
+                    // If existing report on memory is not found, new report is created.
+                    Report.create(reportBody)
+                        .then(report => {
+                            res.status(HttpStatus.CREATED).send(report);
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                            res;
+                            throw 'Error creating report.';
+                        });
+                } else {
+                    // If existing report on memory is found.
+                    res;
+                    throw 'Memory already reported by user.';
+                }
+            })
+            .catch(function(err) {
+                console.log(err);
+                res.status(HttpStatus.BAD_REQUEST).send(err);
+            }
+        );
+    })
+    .catch(function(err) {
+        console.log("MEMORY NOT FOUND")
+        res.status(HttpStatus.BAD_REQUEST).send(err);
+    })
 });
 
 /**
@@ -138,7 +146,7 @@ memoryRouter.post('/reports', async function(req, res) {
 memoryRouter.get('/reports/:id', function(req, res) {
     Report.findAndCountAll({
         where: {
-            memoryId: req.params.id,
+            MemoryId: req.params.id,
         },
     })
         .then(reports => {
@@ -146,6 +154,43 @@ memoryRouter.get('/reports/:id', function(req, res) {
                 res.status(HttpStatus.OK).send(reports);
             } else {
                 throw 'No reports on memory.';
+            }
+        })
+        .catch(function(err) {
+            res.send(err);
+        });
+});
+/**
+ * API (POST) : createCategory
+ */
+memoryRouter.post('/categories', function(req, res) {
+    let categoryBody = req.body;
+    Category.create(categoryBody)
+        .then(category => {
+            res.status(HttpStatus.CREATED).send(category);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(HttpStatus.BAD_REQUEST).send(
+                `Error while creating a category.`
+            );
+        });
+});
+
+/**
+ * API (GET) : getMemoriesByCategoryId
+ */
+memoryRouter.get('/categories/:id', function(req, res) {
+    Memory.findAndCountAll({
+        where: {
+            categoryId: req.params.id,
+        },
+    })
+        .then(memories => {
+            if (memories.count != 0) {
+                res.status(HttpStatus.OK).send(memories);
+            } else {
+                throw 'Category has no memories.';
             }
         })
         .catch(function(err) {
