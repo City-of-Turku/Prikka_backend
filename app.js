@@ -21,8 +21,10 @@ var cors = require('cors');
 //const db & models
 const models = require('./models/index');
 const db = require('./config/db').sequelize;
-const verifyToken = require('./middleware/verifyToken.js')
 require('./config/auth.js')(passport);
+
+//middleware
+const verifyToken = require('./middleware/verifyToken.js')
 
 //Import routes
 const loginRouter = require('./routes/login');
