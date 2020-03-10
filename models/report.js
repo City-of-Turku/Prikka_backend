@@ -34,12 +34,12 @@ const Report = sequelize.define(
 );
 Report.associate = function(models) {
     //Memory reported
-    Report.belongsTo(models.Memory);
-    models.Memory.hasMany(models.Report);
+    Report.belongsTo(models.Memory, {
+        foreignKey: 'memoryId',
+    });
 
     //User that reported the memory
-    Report.belongsTo(models.User);
-    models.User.hasMany(Report);
+    Report.belongsTo(models.User, { foreignKey: 'userId' });
 };
 
 module.exports = Report;

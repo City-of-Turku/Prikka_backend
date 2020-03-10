@@ -55,12 +55,14 @@ const Memory = sequelize.define(
 
 Memory.associate = function(models) {
     //Memory posted by one user
-    Memory.belongsTo(models.User);
-    models.User.hasMany(Memory);
+    Memory.belongsTo(models.User, {
+        foreignKey: 'userId',
+    });
 
     //Memory have one category
-    Memory.belongsTo(models.Category);
-    models.Category.hasMany(Memory);
+    Memory.belongsTo(models.Category, {
+        foreignKey: 'categoryId',
+    });
 };
 
 module.exports = Memory;
