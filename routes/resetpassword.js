@@ -1,38 +1,64 @@
+
+const crypto = require('crypto');
 const express = require('express');
-const router = express.Router();
-const Mailgun = require('mailgun-js');
-const User = require('../models/User');
-const bcrypt = 'bcryptjs';
+const resetPasswordRouter = express.Router();
+const nodemailer = require('nodemailer');
+const User = require('../models').User;
 
-router.post('/resetpassword', (req, res, next) => {
-    //find user
-    User.findOne({ email: req.body.email }, (err, user) => {
-        if (err) {
-            return next(err);
-        }
 
-        //if it doesn't exist
+resetPasswordRouter.post('/', (req, res) => {
+    if(req.body.email == '') {
+        res.status(400).send('email required');
+    }
+    console.log(req.body)
+    console.error(req.body.email, 'moi');
+    User.findOne({
+        where: {
+            email: req.body.email,
+        },
+    }).then((user) => {
         if (user == null) {
-            return next(new Error("User doesn't exist"));
-        }
+            console.error('email not in database');
+            res.status(403).send('email. not in db');
+        } else {
+            const token = crypto.randomBytes(20).toString('hex');
+            user.update({
+                resetPasswordToken: token,
+                resetPasswordExpires: Date.now() + 360000,
+            });
 
-        //generate nonce and set time (to check validity < 24h)
-        user.nonce = randomString(12);
-        user.passwordResetTime = new Date();
-        user.save();
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    type: 'OAuth2',
+                    user: process.env['EMAIL_ADDRESS'],
+                    password: process.env['EMAIL_PASSWORD'],
+                },
+                tls: {
+                    rejectUnauthorized: false
+                }
+            });
 
-        //Mailgun api configuration
-        const mailgun = Mailgun({
-            apiKey: '3b583c8145e844c62c4ed4dfe726e40f-713d4f73-bf68ed5e',
-            domain: 'sandbox135ec95c12184216970220ca2d27785b.mailgun.org',
+            const mailOptions = {
+                from: 'myturkumemories@gmail.com',
+                to: req.body.email,
+                subject: 'Reset password',
+                text:
+                    'Reset password with this link'
+            };
+
+        console.log('sending mail');
+
+        transporter.sendMail(mailOptions, (err, response) => {
+            if(err) {
+                console.error('there was an error:', err);
+            } else {
+                console.log('here is the res: ', response);
+                res.status(200).json('recovery email sent');
+            }
         });
-
-        const data = {
-            to: req.body.email,
-            from: 'myturkumemories@gmail.com',
-            sender: 'MyTurkuMemories',
-            subject: 'Password Reset Request',
-            html: 'trolololoo',
-        };
+    }
     });
 });
+
+module.exports = resetPasswordRouter;

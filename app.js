@@ -30,11 +30,11 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
 const registerRouter = require('./routes/register');
+const resetPasswordRouter = require('./routes/resetpassword');
 
 /* ---------------------
  *         MAIN
  * --------------------- */
-
 const app = express();
 
 if (env.error) {
@@ -102,6 +102,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api/auth-management/login', loginRouter);
 app.use('/api/auth-management/register', registerRouter);
+app.use('/api/auth-management/resetPassword', resetPasswordRouter);
 app.use('/api/memory-management', memoryRouter);
 app.use('/users', passport.authenticate('jwt', {session: false}), usersRouter);
 // catch 404 and forward to error handler

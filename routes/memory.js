@@ -2,7 +2,9 @@ const express = require('express');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
 const HttpStatus = require('http-status-codes');
-
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(
+    '/api/auth-management/login'
+);
 const memoryRouter = express.Router();
 
 /**
@@ -53,13 +55,31 @@ memoryRouter.put('/memories/:id', function(req, res) {
 /**
  * API (DELETE) : deleteMemoryById
  */
-
-//TODO
-
+memoryRouter.delete('/memories/:id', function(req, res) {
+    let memoryId = req.params.id;
+    Memory.destroy({
+        where: {
+            id: memoryId,
+        },
+    })
+        .then((result) => { // result changes between 0 and 1 if memory is found
+            if (result) {
+                // deleted memory
+                res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
+            } else {
+                // memory not found
+                res.status(HttpStatus.OK).send(`Memory #${memoryId} not found, maybe it's already deleted`);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+});
 /**
  * API (GET) : getAllMemories
  */
 memoryRouter.get('/memories', function(req, res) {
+    console.log(req.user);
     Memory.findAll({
         order: [['id', 'DESC']],
     })
