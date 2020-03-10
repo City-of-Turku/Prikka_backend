@@ -59,7 +59,7 @@ db.authenticate()
  */
 
 //TODO : issue, db.sync create new foreign keys each time
-db.sync()
+db.sync({ alter: true })
     .then(() => {
         console.log('Tables successfully synced.\n');
     })
