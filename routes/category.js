@@ -31,7 +31,8 @@ categoryRouter.get('/categories', function(req, res) {
         .then(categories => {
             res.status(HttpStatus.OK).send(categories);
         })
-        .catch(function(err) {
+        .catch(err => {
+            console.log(err);
             res.status(HttpStatus.NOT_FOUND).send(`Categories not found.`);
         });
 });
