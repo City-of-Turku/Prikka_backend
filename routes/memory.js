@@ -10,7 +10,6 @@ const memoryRouter = express.Router();
 
 //middleware
 const verifyToken = require('../middleware/verifyToken.js')
-=======
 
 
 /**
