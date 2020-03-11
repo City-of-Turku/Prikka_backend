@@ -120,10 +120,8 @@ memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', 
                 // deleted memory
                 res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
             } else {
-                // memory not found
-                res.status(HttpStatus.OK).send(
-                    `Memory #${memoryId} not found, maybe it's already deleted`
-                );
+                // memory not found or client is trying to delete someone else's memory
+                // TODO: admin user should never get this
                 res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
