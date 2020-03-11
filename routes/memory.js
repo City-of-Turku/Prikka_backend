@@ -3,11 +3,14 @@ const Memory = require('../models/memory');
 const Report = require('../models/report');
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
-const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(
-    '/api/auth-management/login'
-);
+const passport = require('passport');
+
 const memoryRouter = express.Router();
 
+
+//middleware
+const verifyToken = require('../middleware/verifyToken.js')
+=======
 
 
 /**
@@ -78,11 +81,14 @@ memoryRouter.put('/memories/:id', function(req, res) {
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', function(req, res) {
+memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
     let memoryId = req.params.id;
+    let user = req.user;
+    console.log(user.id)
     Memory.destroy({
         where: {
             id: memoryId,
+            userId: user.id
         },
     })
         .then((result) => { // result changes between 0 and 1 if memory is found
@@ -91,7 +97,7 @@ memoryRouter.delete('/memories/:id', function(req, res) {
                 res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
             } else {
                 // memory not found
-                res.status(HttpStatus.OK).send(`Memory #${memoryId} not found, maybe it's already deleted`);
+                res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
         .catch(err => {

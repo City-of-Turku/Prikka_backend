@@ -57,6 +57,10 @@ const User = sequelize.define(
             type: DataTypes.BIGINT.UNSIGNED,
             // allowNull defaults to true
         },
+        social_media_account: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
+        }
     },
     {
         // Other model options go here

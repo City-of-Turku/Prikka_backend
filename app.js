@@ -21,8 +21,10 @@ var cors = require('cors');
 //const db & models
 const models = require('./models/index');
 const db = require('./config/db').sequelize;
-
 require('./config/auth.js')(passport);
+
+//middleware
+const verifyToken = require('./middleware/verifyToken.js')
 
 //Import routes
 const loginRouter = require('./routes/login');
@@ -101,13 +103,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/api/auth-management/login', loginRouter);
 app.use('/api/auth-management/register', registerRouter);
 app.use('/api/auth-management/resetPassword', resetPasswordRouter);
 app.use('/api/memory-management', memoryRouter);
-app.use('/api/category-management', categoryRouter);
-
+app.use('/users', [verifyToken, passport.authenticate('jwt', {session: false})], usersRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     next(createError(HttpStatus.NOT_FOUND, 'Not found'));
