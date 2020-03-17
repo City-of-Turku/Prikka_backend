@@ -11,8 +11,11 @@ const memoryRouter = express.Router();
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', function(req, res) {
+memoryRouter.post('/memories', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
     let memoryBody = req.body;
+    let user = req.user;
+    memoryBody.userId = user.id;
+    console.log(memoryBody)
     Memory.create(memoryBody)
         .then(memory => {
             res.status(HttpStatus.CREATED).send(memory);
@@ -31,6 +34,7 @@ memoryRouter.post('/memories', function(req, res) {
 memoryRouter.get('/memories/:id', function(req, res) {
     Memory.findByPk(req.params.id)
         .then(memory => {
+            console.log(memory.reports)
             res.status(HttpStatus.OK).send(memory);
         })
         .catch(function(err) {
@@ -41,8 +45,15 @@ memoryRouter.get('/memories/:id', function(req, res) {
 /**
  * API (PUT) : updateMemoryById
  */
-memoryRouter.put('/memories/:id', function(req, res) {
-    Memory.findByPk(req.params.id)
+memoryRouter.put('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+    let memoryId = req.params.id;
+    let user = req.user;
+    Memory.findOne({
+        where: {
+            id: memoryId,
+            userId: user.name
+        },
+    })
         .then(memory => {
             let memoryBody = req.body;
             memory.update(memoryBody);
@@ -95,20 +106,46 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemoryReport
  */
-memoryRouter.post('/reports', async function(req, res) {
+memoryRouter.post('/reports',[verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+    let user = req.user;
     let reportBody = req.body;
+    reportBody.userId = user.id;
+    console.log(reportBody)
     Memory.findOne({
         where: {
-            id: req.body.memoryId,
+            id: reportBody.memoryId
         },
     })
-    .then(memory => {
-        console.log("MEMORY FOUND")
-        Report.findOne({
-            where: {
-                memoryId: req.body.memoryId,
-                userId: req.body.userId,
-            },
+        .then(memory => {
+            console.log('MEMORY FOUND');
+            Report.findOne({
+                where: {
+                    memoryId: reportBody.memoryId,
+                    userId: reportBody.userId,
+                },
+            })
+                .then(report => {
+                    if (report == null) {
+                        // If existing report on memory is not found, new report is created.
+                        Report.create(reportBody)
+                            .then(report => {
+                                res.status(HttpStatus.CREATED).send(report);
+                            })
+                            .catch(function(err) {
+                                console.log(err);
+                                res;
+                                throw 'Error creating report.';
+                            });
+                    } else {
+                        // If existing report on memory is found.
+                        res;
+                        throw 'Memory already reported by user.';
+                    }
+                })
+                .catch(function(err) {
+                    console.log(err);
+                    res.status(HttpStatus.BAD_REQUEST).send(err);
+                });
         })
             .then(report => {
                 if (report == null) {
@@ -143,7 +180,7 @@ memoryRouter.post('/reports', async function(req, res) {
 /**
  * API (GET) : getMemoryReportsById
  */
-memoryRouter.get('/reports/:id', function(req, res) {
+memoryRouter.get('/memories/reports/:id', function(req, res) {
     Report.findAndCountAll({
         where: {
             MemoryId: req.params.id,
