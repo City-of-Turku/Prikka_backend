@@ -81,9 +81,10 @@ module.exports = (passport) => {
 						where: { googleId: profile.id },
 						defaults: {
 							googleId: profile.id,
-							username: profile.displayName,
-							email: profile.emails[0].value,
-							passwordhash: 'asdasda'
+							username: profile.displayName+'#GOOGLE',
+							email: 'GOOGLE#' + profile.emails[0].value,
+							passwordhash: 'noHash',
+							social_media_account: true
 						}
 					})
 					.then((user) => {
@@ -104,19 +105,22 @@ module.exports = (passport) => {
 				clientID: process.env['FACEBOOK_APP_ID'],
 				clientSecret: process.env['FACEBOOK_APP_SECRET'],
                 callbackURL: '/api/auth-management/login/facebook-return',
-                passReqToCallback: true
+				passReqToCallback: true,
+				profileFields: ['id', 'emails', 'displayName']
 			},
 			function(req, accessToken, refreshToken, profile, next) {
 				// passport callback function
 				console.log('FACEBOOK', profile);
+				console.log(profile.displayName)
 				models.User
 					.findOrCreate({
 						where: { facebookId: profile.id },
 						defaults: {
 							facebookId: profile.id,
-							username: profile.displayName,
-							email: 'asdo@asd.fiasdf',
-							passwordhash: 'asdasda'
+							username: profile.displayName+'#FACEBOOK',
+							email: 'FACEBOOK#' + profile.emails[0].value,
+							passwordhash: 'noHash',
+							social_media_account: true
 						}
 					})
 					.then((user) => {
@@ -166,7 +170,8 @@ module.exports = (passport) => {
 								.create({
 									email: email,
 									username: req.body.username,
-									passwordhash: hashedPw
+									passwordhash: hashedPw,
+									social_media_account: false
 								})
 								.then((newUser) => {
 									//if successful
@@ -209,15 +214,18 @@ module.exports = (passport) => {
 					.then((user) => {
 						//If not found
 						if (user == null) {
-							console.log('Login : user not found');
+							console.log('Login: User not found');
 							return next(null, null);
+						} else if (user.social_media_account) {
+							console.log('Login: User is trying to login with social media email')
+							return next(null, null)
 						} else if (bcrypt.compareSync(password, user.dataValues.passwordhash) == false) {
 							//If found, check password
-							console.log('Login :Wrong Password');
+							console.log('Login: Wrong Password');
 							return next(null, null);
 						} else {
 							//found
-							console.log('Login : sucess');
+							console.log('Login: sucess');
                             console.log(user.dataValues);
                             req.user = user.dataValues
 							return next(null, user.dataValues);

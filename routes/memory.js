@@ -3,10 +3,58 @@ const Memory = require('../models/memory');
 const Report = require('../models/report');
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
-const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn(
-    '/api/auth-management/login'
-);
+const passport = require('passport');
+
 const memoryRouter = express.Router();
+const { Op } = require('sequelize');
+
+
+//middleware
+const verifyToken = require('../middleware/verifyToken.js')
+
+
+/**
+ * API (GET) : getAllMemories
+ *
+ * Optional parameters:
+ * - categoryId : to get only memories from one category
+ * - page : offset, to get memories 10 by 10 from database (reduce server load)
+ *
+ */
+memoryRouter.get('/memories', function(req, res) {
+    let filters = {
+        order: [['id', 'DESC']],
+    };
+
+    //Obtain GET request parameters
+    //filter by category
+    let categoriesParam = req.query.categoryId;
+    if (categoriesParam) {
+        let categoryIdList = categoriesParam.split(',');
+        filters.where = { categoryId: { [Op.or]: categoryIdList } };
+    }
+
+    //filter by category
+    let page = req.query.page;
+    if (page) {
+        let maxPerRequest = 10;
+        filters.offset = page * maxPerRequest;
+        filters.limit = maxPerRequest;
+    }
+
+    console.log(filters);
+    Memory.findAndCountAll(filters)
+        .then(memories => {
+            if (memories.count != 0) {
+                res.status(HttpStatus.OK).send(memories);
+            } else {
+                throw 'No memory to send';
+            }
+        })
+        .catch(function(err) {
+            res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
+        });
+});
 
 /**
  * API (POST) : createMemory
@@ -67,39 +115,29 @@ memoryRouter.put('/memories/:id', [verifyToken, passport.authenticate('jwt', {se
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', function(req, res) {
+memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
     let memoryId = req.params.id;
+    let user = req.user;
+    console.log(user.id)
     Memory.destroy({
         where: {
             id: memoryId,
+            userId: user.id
         },
     })
-        .then((result) => { // result changes between 0 and 1 if memory is found
+        .then(result => {
+            // result changes between 0 and 1 if memory is found
             if (result) {
                 // deleted memory
                 res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
             } else {
-                // memory not found
-                res.status(HttpStatus.OK).send(`Memory #${memoryId} not found, maybe it's already deleted`);
+                // memory not found or client is trying to delete someone else's memory
+                // TODO: admin user should never get this
+                res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
         .catch(err => {
             console.error(err);
-        });
-});
-/**
- * API (GET) : getAllMemories
- */
-memoryRouter.get('/memories', function(req, res) {
-    console.log(req.user);
-    Memory.findAll({
-        order: [['id', 'DESC']],
-    })
-        .then(memories => {
-            res.status(HttpStatus.OK).send(memories);
-        })
-        .catch(function(err) {
-            res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
         });
 });
 
