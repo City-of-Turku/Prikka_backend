@@ -1,12 +1,13 @@
 const express = require('express');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
+const User = require('../models/user')
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
-const passport = require('passport');
-
 const memoryRouter = express.Router();
 const { Op } = require('sequelize');
+const passport = require('passport');
+const sequelize = require('../config/db').sequelize;
 
 
 //middleware
@@ -80,7 +81,23 @@ memoryRouter.post('/memories', [verifyToken, passport.authenticate('jwt', {sessi
  * API (GET) : getMemoryById
  */
 memoryRouter.get('/memories/:id', function(req, res) {
-    Memory.findByPk(req.params.id)
+    Memory.findByPk(req.params.id,{ 
+        attributes: { include: [
+        [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
+        ]},
+        include: 
+        [
+            {
+                model: User,
+                attributes: ['username']
+            }, 
+            {
+                required: true,
+                model: Report,
+                attributes: []
+            }
+        ],
+    })
         .then(memory => {
             console.log(memory.reports)
             res.status(HttpStatus.OK).send(memory);
@@ -185,34 +202,10 @@ memoryRouter.post('/reports',[verifyToken, passport.authenticate('jwt', {session
                     res.status(HttpStatus.BAD_REQUEST).send(err);
                 });
         })
-            .then(report => {
-                if (report == null) {
-                    // If existing report on memory is not found, new report is created.
-                    Report.create(reportBody)
-                        .then(report => {
-                            res.status(HttpStatus.CREATED).send(report);
-                        })
-                        .catch(function(err) {
-                            console.log(err);
-                            res;
-                            throw 'Error creating report.';
-                        });
-                } else {
-                    // If existing report on memory is found.
-                    res;
-                    throw 'Memory already reported by user.';
-                }
-            })
-            .catch(function(err) {
-                console.log(err);
-                res.status(HttpStatus.BAD_REQUEST).send(err);
-            }
-        );
-    })
-    .catch(function(err) {
-        console.log("MEMORY NOT FOUND")
-        res.status(HttpStatus.BAD_REQUEST).send(err);
-    })
+        .catch(function(err) {
+            console.log("MEMORY NOT FOUND")
+            res.status(HttpStatus.BAD_REQUEST).send(err);
+        })
 });
 
 /**

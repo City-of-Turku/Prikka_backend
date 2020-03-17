@@ -17,6 +17,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db').sequelize;
 const Report = require('./report');
+const User = require('./user')
 
 const Memory = sequelize.define(
     'Memory',
@@ -49,35 +50,6 @@ const Memory = sequelize.define(
             type: DataTypes.GEOMETRY('POINT'),
             allowNull: false,
         },
-        reports: {
-            type: DataTypes.VIRTUAL,
-            get() {
-                console.log(this.id)
-                Memory.FindAndCountAll({
-                    where: {
-                        memoryId: 6,
-                    },
-                })
-                    .then(reports => {
-                        console.log("asdf")
-                        if (reports.count != 0) {
-                            return reports.count;
-                        } else {
-                            return 0;
-                        }
-                    })
-                    .catch(function(err) {
-                        return 0;    
-                    });
-            return 0;
-            },
-        },
-        user: {
-            type: DataTypes.VIRTUAL,
-            get () {
-                return "asdfa"
-            }
-        },
     },
     {
         timestamps: true,
@@ -88,6 +60,10 @@ Memory.associate = function(models) {
     //Memory posted by one user
     Memory.belongsTo(models.User, {
         foreignKey: 'userId',
+    });
+
+    Memory.hasMany(models.Report, {
+        foreignKey: 'memoryId'
     });
 
     //Memory have one category
