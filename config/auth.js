@@ -21,10 +21,11 @@ module.exports = (passport) => {
 				secretOrKey: process.env['JWT_SECRET']
 			},
 			function(jwtPayload, next) {
+				console.log(jwtPayload)
 				models.User
 					.findOne({
 						where: {
-							username: jwtPayload
+							username: jwtPayload.username,
 						}
 					})
 					.then((user) => {

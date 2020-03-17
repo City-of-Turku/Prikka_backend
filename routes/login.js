@@ -40,9 +40,13 @@ loginRouter.get('/google-return', (req, res, next) => {
 			if (err) {
 				res.send(err);
 			}
-			// sign token with username and secret string
-			const token = jwt.sign(user['username'], process.env['JWT_SECRET']);
-			return res.json({ user, token }); // send token to client
+			// sign token with user object and secret string
+			const token = jwt.sign(user, process.env['JWT_SECRET'], { expiresIn: '15min' });
+			return res.status(200).json({
+				message: 'Succesfully logged in',
+				username: user.username,
+				token: token
+			});
 		});
 	})(req, res);
 });
@@ -69,9 +73,13 @@ loginRouter.get('/facebook-return', (req, res, next) => {
 			if (err) {
 				res.send(err);
 			}
-			// sign token with username and secret string
-			const token = jwt.sign(user['username'], process.env['JWT_SECRET']);
-			return res.json({ user, token }); // send token to client
+			// sign token with user object and secret string
+			const token = jwt.sign(user, process.env['JWT_SECRET'], { expiresIn: '15min' });
+			return res.status(200).json({
+				message: 'Succesfully logged in',
+				username: user.username,
+				token: token
+			});
 		});
 	})(req, res);
 });
@@ -84,13 +92,16 @@ loginRouter.post('/', function(req, res, next) {
 				user: user
 			});
 		}
-		user = _.pick(req.user, [ 'username' ]); // pick only the username from user object
 		req.login(user, { session: false }, (err) => {
 			if (err) {
 				res.send(err);
 			}
-			const token = jwt.sign(user['username'], process.env['JWT_SECRET']);
-			return res.json({ user, token });
+			const token = jwt.sign(user, process.env['JWT_SECRET'], { expiresIn: '15min' });
+			return res.status(200).json({
+				message: 'Succesfully logged in',
+				username: user.username,
+				token: token
+			});
 		});
 	})(req, res);
 });
