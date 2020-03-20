@@ -60,8 +60,13 @@ const User = sequelize.define(
         social_media_account: {
             type: DataTypes.BOOLEAN,
             allowNull: false
+        },
+        admin: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false
         }
     },
+    
     {
         // Other model options go here
         timestamps: true, // automatically adds the fields createdAt and updatedAt to model

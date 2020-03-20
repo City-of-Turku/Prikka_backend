@@ -85,7 +85,8 @@ module.exports = (passport) => {
 							username: profile.displayName+'#GOOGLE',
 							email: 'GOOGLE#' + profile.emails[0].value,
 							passwordhash: 'noHash',
-							social_media_account: true
+							social_media_account: true,
+							admin: false
 						}
 					})
 					.then((user) => {
@@ -121,7 +122,8 @@ module.exports = (passport) => {
 							username: profile.displayName+'#FACEBOOK',
 							email: 'FACEBOOK#' + profile.emails[0].value,
 							passwordhash: 'noHash',
-							social_media_account: true
+							social_media_account: true,
+							admin: false
 						}
 					})
 					.then((user) => {
@@ -172,7 +174,8 @@ module.exports = (passport) => {
 									email: email,
 									username: req.body.username,
 									passwordhash: hashedPw,
-									social_media_account: false
+									social_media_account: false,
+									admin: false
 								})
 								.then((newUser) => {
 									//if successful

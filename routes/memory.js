@@ -107,7 +107,6 @@ memoryRouter.put('/memories/:id', function(req, res) {
 memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
     let memoryId = req.params.id;
     let user = req.user;
-    console.log(user.id)
     Memory.destroy({
         where: {
             id: memoryId,
@@ -197,5 +196,27 @@ memoryRouter.get('/reports/:id', function(req, res) {
             res.send(err);
         });
 });
+
+/*
+    API GET - list of categories
+*/
+
+memoryRouter.get('/categories', function(req, res) {
+    Category.findAll({
+        attributes: ['name', 'description', 'id']
+    })
+    .then(categories => {
+        res.status(HttpStatus.OK).json({
+            message: 'Found these gategories',
+            gategories: categories
+        })
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(HttpStatus.BAD_REQUEST).json({
+            message: 'Bad request'
+        })
+    })
+})
 
 module.exports = memoryRouter;
