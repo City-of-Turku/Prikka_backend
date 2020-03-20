@@ -24,6 +24,22 @@ const verifyToken = require('../middleware/verifyToken.js')
  */
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
+        attributes: {
+            include: [
+                [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
+                ]
+        },
+        include: [
+            {
+                model: User,
+                attributes: ['username']
+            }, 
+            {
+                required: true,
+                model: Report,
+                attributes: []
+            }
+        ],
         order: [['id', 'DESC']],
     };
 
