@@ -22,6 +22,8 @@ const verifyToken = require('../middleware/verifyToken.js')
  *
  */
 memoryRouter.get('/memories', function(req, res) {
+    const { _raw, _json, ...userProfile } = req.user;
+    console.log('lnnlnönönlgl',userProfile)
     let filters = {
         order: [['id', 'DESC']],
     };
@@ -208,7 +210,7 @@ memoryRouter.get('/categories', function(req, res) {
     .then(categories => {
         res.status(HttpStatus.OK).json({
             message: 'Found these gategories',
-            gategories: categories
+            categories: categories
         })
     })
     .catch(err => {
