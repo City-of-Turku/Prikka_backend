@@ -20,13 +20,15 @@ const User = sequelize.define(
     {
         // Model attributes are defined here
         // No need to put id, it's automatic integer autoincrement
-        username: {
+        // putting id here since we are using the ID we get from auth0. This ID can be used to identify users from each other
+        displayName: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: {
-                args: true,
-                msg: 'This username is taken',
-            },
+        },
+        id: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            primaryKey: true
         },
         email: {
             type: DataTypes.STRING,
@@ -34,31 +36,9 @@ const User = sequelize.define(
             validate: {
                 isEmail: true,
             },
-            unique: {
-                args: true,
-                msg: 'Email address already in use!',
-            },
         },
-        passwordhash: {
-            type: DataTypes.CHAR(60),
-            allowNull: false,
-            validate: {
-                min: {
-                    args: 6,
-                    msg: 'Password has to be minimum 6 characters',
-                },
-            },
-        },
-        googleId: {
+        provider: {
             type: DataTypes.CHAR(24),
-            // allowNull defaults to true
-        },
-        facebookId: {
-            type: DataTypes.BIGINT.UNSIGNED,
-            // allowNull defaults to true
-        },
-        social_media_account: {
-            type: DataTypes.BOOLEAN,
             allowNull: false
         },
         admin: {
