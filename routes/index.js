@@ -1,11 +1,11 @@
-const express = require('express');
+// routes/index.js
 
-const indexRouter = express.Router();
+var express = require('express');
+var router = express.Router();
 
 /* GET home page. */
-indexRouter.get('/', function(req, res, next) {
-    //res.render('index', { title: 'Express' })
-    res.send();
+router.get('/', function (req, res, next) {
+  res.render('index', { title: 'Auth0 Webapp sample Nodejs' });
 });
 
-module.exports = indexRouter;
+module.exports = router;
