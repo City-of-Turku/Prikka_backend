@@ -22,7 +22,7 @@ authRouter.get('/login', passport.authenticate('auth0', {
 authRouter.get('/callback', function (req, res, next) {
   passport.authenticate('auth0', function (err, user, info) {
     if (err) { return next(err); }
-    if (!user) { return res.redirect('/login'); }
+    if (!user) { return res.redirect(process.env['LOGIN_REDIRECT']); }
     req.logIn(user, function (err) {
       if (err) { return next(err); }
       const returnTo = req.session.returnTo;

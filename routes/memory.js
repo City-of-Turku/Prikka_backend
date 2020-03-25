@@ -3,15 +3,11 @@ const Memory = require('../models/memory');
 const Report = require('../models/report');
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
-const passport = require('passport');
 
 const memoryRouter = express.Router();
 const { Op } = require('sequelize');
 
-
-//middleware
-const verifyToken = require('../middleware/verifyToken.js')
-
+const secured = require('../middleware/secured')
 
 /**
  * API (GET) : getAllMemories
@@ -22,8 +18,6 @@ const verifyToken = require('../middleware/verifyToken.js')
  *
  */
 memoryRouter.get('/memories', function(req, res) {
-    const { _raw, _json, ...userProfile } = req.user;
-    console.log('lnnlnönönlgl',userProfile)
     let filters = {
         order: [['id', 'DESC']],
     };
@@ -61,8 +55,11 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', function(req, res) {
+memoryRouter.post('/memories', secured(), function(req, res) {
+    const { _raw, _json, ...userProfile } = req.user;
+    console.log(userProfile)
     let memoryBody = req.body;
+    memoryBody['userId'] = userProfile.id
     Memory.create(memoryBody)
         .then(memory => {
             res.status(HttpStatus.CREATED).send(memory);
@@ -106,7 +103,7 @@ memoryRouter.put('/memories/:id', function(req, res) {
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+memoryRouter.delete('/memories/:id', function(req, res) {
     let memoryId = req.params.id;
     let user = req.user;
     Memory.destroy({
@@ -198,27 +195,5 @@ memoryRouter.get('/reports/:id', function(req, res) {
             res.send(err);
         });
 });
-
-/*
-    API GET - list of categories
-*/
-
-memoryRouter.get('/categories', function(req, res) {
-    Category.findAll({
-        attributes: ['name', 'description', 'id']
-    })
-    .then(categories => {
-        res.status(HttpStatus.OK).json({
-            message: 'Found these gategories',
-            categories: categories
-        })
-    })
-    .catch(err => {
-        console.error(err);
-        res.status(HttpStatus.BAD_REQUEST).json({
-            message: 'Bad request'
-        })
-    })
-})
 
 module.exports = memoryRouter;

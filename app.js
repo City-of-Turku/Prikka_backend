@@ -25,8 +25,7 @@ const db = require('./config/db').sequelize;
 require('./config/auth.js')(passport);
 
 //middleware
-const userInViews = require('./middleware/userInViews')
-const verifyToken = require('./middleware/verifyToken.js');
+const secured = require('./middleware/secured')
 const verifyAdmin = require('./middleware/verifyAdmin');
 
 //Import routes
@@ -35,8 +34,6 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
 const categoryRouter = require('./routes/category');
-const registerRouter = require('./routes/register');
-const resetPasswordRouter = require('./routes/resetpassword');
 const adminRouter = require('./routes/admin');
 
 /* ---------------------
@@ -67,7 +64,7 @@ db
 
 //TODO : issue, db.sync create new foreign keys each time
 db
-	.sync({ force: true })
+	.sync({ alter: true })
 	.then(() => {
 		console.log('Tables successfully synced.\n');
 	})
@@ -89,10 +86,13 @@ app.use(
 	})
 );
 var sess = {
-	secret: 'slfo0jr4u7djhe7e83_dhg',
-	cookie: {},
+	secret: process.env['SESSION_SECRET'],
+	cookie: {
+		// httpOnly: true,
+		maxAge: Number(process.env['SESSION_MAX_AGE'])
+	},
 	resave: false,
-	saveUninitialized: true
+	saveUninitialized: true // create new session for all requests
 };
 
 if (app.get('env') === 'production') {
@@ -103,39 +103,8 @@ app.use(session(sess))
 
 app.use(helmet())
 
-// Initialize Passport and restore authentication state, if any,= require (the
-// session.
-
-// move this to config/auth.js
-// Configure Passport to use Auth0
-// var strategy = new Auth0Strategy(
-//   {
-//     domain: process.env.AUTH0_DOMAIN,
-//     clientID: process.env.AUTH0_CLIENT_ID,
-//     clientSecret: process.env.AUTH0_CLIENT_SECRET,
-//     callbackURL:
-//       'https://localhost:4500/api/auth-management/callback'
-//   },
-//   function (accessToken, refreshToken, extraParams, profile, done) {
-//     // accessToken is the token to call Auth0 API (not needed in the most cases)
-//     // extraParams.id_token has the JSON Web Token
-//     // profile has all the information from the user
-//     return done(null, profile);
-//   }
-// );
-
-// passport.use(strategy);
-
 app.use(passport.initialize());
 app.use(passport.session());
-
-// passport.serializeUser(function (user, done) {
-//   done(null, user);
-// });
-
-// passport.deserializeUser(function (user, done) {
-//   done(null, user);
-// });
 
 app.use(flash());
 app.use(cors());
@@ -147,11 +116,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/api/auth-management', authRouter);
-// app.use('/api/auth-management/register', registerRouter);
-// app.use('/api/auth-management/resetPassword', resetPasswordRouter);
 app.use('/api/memory-management', memoryRouter);
-app.use('/api/admin/', [verifyToken, passport.authenticate('jwt', { session: false }), verifyAdmin], adminRouter);
-app.use('/users', usersRouter);
+app.use('/api/admin/', [secured(), verifyAdmin], adminRouter);
+app.use('/api/user-management', secured(), usersRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
 	next(createError(HttpStatus.NOT_FOUND, 'Not found'));
@@ -165,14 +132,11 @@ app.use((err, req, res, next) => {
 
 	//set status for response
 	res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
-	// render the error page
-
-	//res.render('error') //deactivated render, if not, the whole html page is send back as a response
 
 	//create response body
 	const data = {
 		message: err.message,
-		user: req.body
+		reqBody: req.body
 	};
 
 	//send response ()
