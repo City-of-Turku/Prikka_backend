@@ -8,10 +8,8 @@ const passport = require('passport');
 const memoryRouter = express.Router();
 const { Op } = require('sequelize');
 
-
 //middleware
-const verifyToken = require('../middleware/verifyToken.js')
-
+const verifyToken = require('../middleware/verifyToken.js');
 
 /**
  * API (GET) : getAllMemories
@@ -104,30 +102,36 @@ memoryRouter.put('/memories/:id', function(req, res) {
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
-    let memoryId = req.params.id;
-    let user = req.user;
-    Memory.destroy({
-        where: {
-            id: memoryId,
-            userId: user.id
-        },
-    })
-        .then(result => {
-            // result changes between 0 and 1 if memory is found
-            if (result) {
-                // deleted memory
-                res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
-            } else {
-                // memory not found or client is trying to delete someone else's memory
-                // TODO: admin user should never get this
-                res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
-            }
+memoryRouter.delete(
+    '/memories/:id',
+    [verifyToken, passport.authenticate('jwt', { session: false })],
+    function(req, res) {
+        let memoryId = req.params.id;
+        let user = req.user;
+        Memory.destroy({
+            where: {
+                id: memoryId,
+                userId: user.id,
+            },
         })
-        .catch(err => {
-            console.error(err);
-        });
-});
+            .then(result => {
+                // result changes between 0 and 1 if memory is found
+                if (result) {
+                    // deleted memory
+                    res.status(HttpStatus.OK).send(
+                        `Deleted memory #${memoryId}`
+                    );
+                } else {
+                    // memory not found or client is trying to delete someone else's memory
+                    // TODO: admin user should never get this
+                    res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
+);
 
 /**
  * API (POST) : createMemoryReport
@@ -196,27 +200,5 @@ memoryRouter.get('/reports/:id', function(req, res) {
             res.send(err);
         });
 });
-
-/*
-    API GET - list of categories
-*/
-
-memoryRouter.get('/categories', function(req, res) {
-    Category.findAll({
-        attributes: ['name', 'description', 'id']
-    })
-    .then(categories => {
-        res.status(HttpStatus.OK).json({
-            message: 'Found these gategories',
-            gategories: categories
-        })
-    })
-    .catch(err => {
-        console.error(err);
-        res.status(HttpStatus.BAD_REQUEST).json({
-            message: 'Bad request'
-        })
-    })
-})
 
 module.exports = memoryRouter;

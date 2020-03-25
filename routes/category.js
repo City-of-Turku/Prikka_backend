@@ -26,14 +26,19 @@ categoryRouter.post('/categories', function(req, res) {
  */
 categoryRouter.get('/categories', function(req, res) {
     Category.findAll({
-        order: [['name', 'ASC']],
+        attributes: ['name', 'description', 'id'],
     })
         .then(categories => {
-            res.status(HttpStatus.OK).send(categories);
+            res.status(HttpStatus.OK).json({
+                message: 'Found these categories',
+                categories: categories,
+            });
         })
         .catch(err => {
-            console.log(err);
-            res.status(HttpStatus.NOT_FOUND).send(`Categories not found.`);
+            console.error(err);
+            res.status(HttpStatus.BAD_REQUEST).json({
+                message: 'Bad request',
+            });
         });
 });
 
