@@ -42,19 +42,18 @@ const adminRouter = require('./routes/admin');
 const app = express();
 
 if (env.error) {
-	console.error('FATAL ERROR: .env file is not defined');
-	process.exit(1);
+    console.error('FATAL ERROR: .env file is not defined');
+    process.exit(1);
 }
 
 // database setup here
-db
-	.authenticate()
-	.then(() => {
-		console.log('Connection has been established successfully.\n');
-	})
-	.catch((err) => {
-		console.error('Unable to connect to the database:', err);
-	});
+db.authenticate()
+    .then(() => {
+        console.log('Connection has been established successfully.\n');
+    })
+    .catch(err => {
+        console.error('Unable to connect to the database:', err);
+    });
 
 /*
  * User.sync() - This creates the table if it doesn't exist (and does nothing if it already exists)
@@ -63,14 +62,13 @@ db
  */
 
 //TODO : issue, db.sync create new foreign keys each time
-db
-	.sync({ alter: true })
-	.then(() => {
-		console.log('Tables successfully synced.\n');
-	})
-	.catch((err) => {
-		console.error('Error syncing tables:', err, '\n');
-	});
+db.sync()
+    .then(() => {
+        console.log('Tables successfully synced.\n');
+    })
+    .catch(err => {
+        console.error('Error syncing tables:', err, '\n');
+    });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -81,9 +79,9 @@ app.set('view engine', 'pug');
 // app.use(logger("combined"));
 app.use(cookieParser());
 app.use(
-	bodyParser.urlencoded({
-		extended: false
-	})
+    bodyParser.urlencoded({
+        extended: false,
+    })
 );
 var sess = {
 	secret: process.env['SESSION_SECRET'],
@@ -121,14 +119,14 @@ app.use('/api/admin/', [secured(), verifyAdmin], adminRouter);
 app.use('/api/user-management', secured(), usersRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
-	next(createError(HttpStatus.NOT_FOUND, 'Not found'));
+    next(createError(HttpStatus.NOT_FOUND, 'Not found'));
 });
 
 // error handler
 app.use((err, req, res, next) => {
-	//set locals for dev
-	res.locals.message = err.message;
-	res.locals.error = req.app.get('env') === 'development' ? err : {};
+    //set locals for dev
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
 	//set status for response
 	res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
@@ -139,8 +137,8 @@ app.use((err, req, res, next) => {
 		reqBody: req.body
 	};
 
-	//send response ()
-	res.send(data);
+    //send response ()
+    res.send(data);
 
 });
 

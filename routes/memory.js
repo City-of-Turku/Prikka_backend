@@ -123,10 +123,24 @@ memoryRouter.delete('/memories/:id', function(req, res) {
                 res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
-        .catch(err => {
-            console.error(err);
-        });
-});
+            .then(result => {
+                // result changes between 0 and 1 if memory is found
+                if (result) {
+                    // deleted memory
+                    res.status(HttpStatus.OK).send(
+                        `Deleted memory #${memoryId}`
+                    );
+                } else {
+                    // memory not found or client is trying to delete someone else's memory
+                    // TODO: admin user should never get this
+                    res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
+);
 
 /**
  * API (POST) : createMemoryReport
