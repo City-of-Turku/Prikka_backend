@@ -22,33 +22,6 @@ const verifyToken = require('../middleware/verifyToken.js')
  * - page : offset, to get memories 10 by 10 from database (reduce server load)
  *
  */
-memoryRouter.get('/m', function(req, res) {
-    Memory.findAndCountAll({ 
-        include: 
-        [
-            {
-                model: User,
-                attributes: ['username']
-            }, 
-            {
-                required: false,
-                model: Report
-            }
-        ],
-        attributes: { include: 
-        [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']]
-        },
-        
-    })
-        .then(rows => {
-            //console.log(count)
-            console.log(rows)
-            res.status(HttpStatus.OK).send(rows);
-        })
-        .catch(function(err) {
-            res.status(HttpStatus.NOT_FOUND).send(err);
-        });
-});
 
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
@@ -56,24 +29,20 @@ memoryRouter.get('/memories', function(req, res) {
     };
 
     
-
     filters.include = [
         {
-            required: false,
             model: User,
             attributes: ['username']
         }, 
         {
-            required: false,
             model: Report,
+            required: false,
+            attributes: ['id']
         }
     ];
+ 
+    filters.distinct = true
 
-    /*filters.attributes = {
-        include: [
-            [sequelize.fn('COUNT', 'Reports.id'), 'reportsCount']
-            ]
-    };*/
 
     //Obtain GET request parameters
     //filter by category
@@ -95,7 +64,7 @@ memoryRouter.get('/memories', function(req, res) {
     Memory.findAndCountAll(filters)
         .then(memories => {
             if (memories.count != 0) {
-                res.status(HttpStatus.OK).send(memories.rows[5].Reports);
+                res.status(HttpStatus.OK).send(memories);
             } else {
                 throw 'No memory to send';
             }
@@ -238,7 +207,9 @@ memoryRouter.post('/reports',[verifyToken, passport.authenticate('jwt', {session
                             })
                             .catch(function(err) {
                                 console.log(err);
-                                res;
+                                res.status(HttpStatus.BAD_REQUEST).json({
+                                    message: 'Error creating report'
+                                });
                                 throw 'Error creating report.';
                             });
                     } else {
