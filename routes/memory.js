@@ -22,26 +22,58 @@ const verifyToken = require('../middleware/verifyToken.js')
  * - page : offset, to get memories 10 by 10 from database (reduce server load)
  *
  */
-memoryRouter.get('/memories', function(req, res) {
-    let filters = {
-        attributes: {
-            include: [
-                [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
-                ]
-        },
-        include: [
+memoryRouter.get('/m', function(req, res) {
+    Memory.findAndCountAll({ 
+        include: 
+        [
             {
                 model: User,
                 attributes: ['username']
             }, 
             {
-                required: true,
-                model: Report,
-                attributes: []
+                required: false,
+                model: Report
             }
         ],
-        order: [['id', 'DESC']],
+        attributes: { include: 
+        [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']]
+        },
+        
+    })
+        .then(rows => {
+            //console.log(count)
+            console.log(rows)
+            res.status(HttpStatus.OK).send(rows);
+        })
+        .catch(function(err) {
+            res.status(HttpStatus.NOT_FOUND).send(err);
+        });
+});
+
+memoryRouter.get('/memories', function(req, res) {
+    let filters = {
+        order: [['id', 'ASC']],
     };
+
+    
+
+    filters.include = [
+        {
+            required: false,
+            model: User,
+            attributes: ['username']
+        }, 
+        {
+            required: false,
+            model: Report,
+        }
+    ];
+
+    /*filters.attributes = {
+        include: [
+            [sequelize.fn('COUNT', 'Reports.id'), 'reportsCount']
+            ]
+    };*/
 
     //Obtain GET request parameters
     //filter by category
@@ -63,12 +95,13 @@ memoryRouter.get('/memories', function(req, res) {
     Memory.findAndCountAll(filters)
         .then(memories => {
             if (memories.count != 0) {
-                res.status(HttpStatus.OK).send(memories);
+                res.status(HttpStatus.OK).send(memories.rows[5].Reports);
             } else {
                 throw 'No memory to send';
             }
         })
         .catch(function(err) {
+            console.log(err);
             res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
         });
 });
@@ -98,9 +131,6 @@ memoryRouter.post('/memories', [verifyToken, passport.authenticate('jwt', {sessi
  */
 memoryRouter.get('/memories/:id', function(req, res) {
     Memory.findByPk(req.params.id,{ 
-        attributes: { include: [
-        [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
-        ]},
         include: 
         [
             {
@@ -113,6 +143,10 @@ memoryRouter.get('/memories/:id', function(req, res) {
                 attributes: []
             }
         ],
+        attributes: { include: [
+        [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
+        ]},
+        
     })
         .then(memory => {
             console.log(memory.reports)
