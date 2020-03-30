@@ -17,6 +17,7 @@ const fs = require('fs')
  */
 
 var port = normalizePort(process.env.PORT || '3000');
+var hostname = process.env['HOSTNAME']
 app.set('port', port);
 
 /**
@@ -29,7 +30,7 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port, () => {
+server.listen(port, hostname, () => {
     console.log(`Listening on port ${port}`);
 });
 server.on('error', onError);
