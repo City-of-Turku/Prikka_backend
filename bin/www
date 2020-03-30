@@ -6,11 +6,11 @@
 
 var app = require('../app');
 var debug = require('debug')('turkumemoriesbackend:server');
-var https = require('https');
+var http = require('http');
 const fs = require('fs')
 
-const key = fs.readFileSync('certs/localhost-key.pem');
-const cert = fs.readFileSync('certs/localhost.pem');
+// const key = fs.readFileSync('certs/localhost-key.pem');
+// const cert = fs.readFileSync('certs/localhost.pem');
 
 /**
  * Get port= require (environment and store in Express.
@@ -23,7 +23,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = https.createServer({key, cert}, app);
+var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
