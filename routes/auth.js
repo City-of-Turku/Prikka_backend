@@ -7,6 +7,7 @@ var dotenv = require('dotenv');
 var util = require('util');
 var url = require('url');
 var querystring = require('querystring');
+const HttpStatus = require('http-status-codes');
 
 
 const authRouter = express.Router();
@@ -17,6 +18,7 @@ authRouter.get('/login', passport.authenticate('auth0', {
 }), function (req, res) {
   res.redirect('/');
 });
+// res.redirect(`${process.env['HOSTNAME']}:${process.env['FRONTEND_PORT']}`);
 
 // Perform the final stage of authentication and redirect to previously requested URL or '/user'
 authRouter.get('/callback', function (req, res, next) {
@@ -25,9 +27,7 @@ authRouter.get('/callback', function (req, res, next) {
     if (!user) { return res.redirect(process.env['LOGIN_REDIRECT']); }
     req.logIn(user, function (err) {
       if (err) { return next(err); }
-      const returnTo = req.session.returnTo;
-      delete req.session.returnTo;
-      res.redirect(returnTo || '/');
+      res.redirect(process.env['FRONTEND_LOCATION']);
     });
   })(req, res, next);
 });
@@ -52,6 +52,20 @@ authRouter.get('/logout', (req, res) => {
 
   res.redirect(logoutURL);
 });
+
+authRouter.get('/logged', (req, res) => {
+  if (req.user) {
+    res.status(HttpStatus.OK).json({
+      message: 'User status',
+      logged: true
+    });
+  } else {
+    res.status(HttpStatus.OK).json({
+      message: 'User status',
+      logged: false
+    });
+  }
+})
 
 // // authentication via google
 // loginRouter.get(
