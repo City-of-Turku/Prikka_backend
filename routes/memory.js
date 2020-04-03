@@ -126,7 +126,7 @@ memoryRouter.get('/memories/:id', function(req, res) {
 /**
  * API (PUT) : updateMemoryById
  */
-memoryRouter.put('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+memoryRouter.put('/memories/:id', secured(), function(req, res) {
     let memoryId = req.params.id;
     let user = req.user;
     Memory.findOne({
@@ -190,7 +190,7 @@ memoryRouter.delete('/memories/:id', function(req, res) {
 /**
  * API (POST) : createMemoryReport
  */
-memoryRouter.post('/reports',[verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+memoryRouter.post('/reports', secured(), function(req, res) {
     let user = req.user;
     let reportBody = req.body;
     reportBody.userId = user.id;
