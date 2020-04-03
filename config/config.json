@@ -1,7 +1,7 @@
 {
     "development": {
         "username": "root",
-        "password": "",
+        "password": "toor",
         "database": "myturkumemories_db",
         "options": {
             "host": "localhost",
@@ -11,14 +11,14 @@
     },
     "test": {
         "username": "root",
-        "password": "",
+        "password": "toor",
         "database": "myturkumemory_db",
         "host": "localhost",
         "dialect": "mysql"
     },
     "production": {
         "username": "root",
-        "password": "",
+        "password": "toor",
         "database": "myturkumemory_db",
         "host": "localhost",
         "dialect": "mysql"

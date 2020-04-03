@@ -1,11 +1,13 @@
 const express = require('express');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
+const User = require('../models/user')
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
-
 const memoryRouter = express.Router();
 const { Op } = require('sequelize');
+const passport = require('passport');
+const sequelize = require('../config/db').sequelize;
 
 const secured = require('../middleware/secured')
 
@@ -17,10 +19,27 @@ const secured = require('../middleware/secured')
  * - page : offset, to get memories 10 by 10 from database (reduce server load)
  *
  */
+
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
-        order: [['id', 'DESC']],
+        order: [['id', 'ASC']],
     };
+
+    
+    filters.include = [
+        {
+            model: User,
+            attributes: ['username']
+        }, 
+        {
+            model: Report,
+            required: false,
+            attributes: ['id']
+        }
+    ];
+ 
+    filters.distinct = true
+
 
     //Obtain GET request parameters
     //filter by category
@@ -48,6 +67,7 @@ memoryRouter.get('/memories', function(req, res) {
             }
         })
         .catch(function(err) {
+            console.log(err);
             res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
         });
 });
@@ -76,8 +96,26 @@ memoryRouter.post('/memories', secured(), function(req, res) {
  * API (GET) : getMemoryById
  */
 memoryRouter.get('/memories/:id', function(req, res) {
-    Memory.findByPk(req.params.id)
+    Memory.findByPk(req.params.id,{ 
+        include: 
+        [
+            {
+                model: User,
+                attributes: ['username']
+            }, 
+            {
+                required: true,
+                model: Report,
+                attributes: []
+            }
+        ],
+        attributes: { include: [
+        [sequelize.fn('COUNT', 'Report.id'), 'reportsCount']
+        ]},
+        
+    })
         .then(memory => {
+            console.log(memory.reports)
             res.status(HttpStatus.OK).send(memory);
         })
         .catch(function(err) {
@@ -88,8 +126,15 @@ memoryRouter.get('/memories/:id', function(req, res) {
 /**
  * API (PUT) : updateMemoryById
  */
-memoryRouter.put('/memories/:id', function(req, res) {
-    Memory.findByPk(req.params.id)
+memoryRouter.put('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+    let memoryId = req.params.id;
+    let user = req.user;
+    Memory.findOne({
+        where: {
+            id: memoryId,
+            userId: user.name
+        },
+    })
         .then(memory => {
             let memoryBody = req.body;
             memory.update(memoryBody);
@@ -145,19 +190,22 @@ memoryRouter.delete('/memories/:id', function(req, res) {
 /**
  * API (POST) : createMemoryReport
  */
-memoryRouter.post('/reports', async function(req, res) {
+memoryRouter.post('/reports',[verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+    let user = req.user;
     let reportBody = req.body;
+    reportBody.userId = user.id;
+    console.log(reportBody)
     Memory.findOne({
         where: {
-            id: req.body.memoryId,
+            id: reportBody.memoryId
         },
     })
         .then(memory => {
             console.log('MEMORY FOUND');
             Report.findOne({
                 where: {
-                    memoryId: req.body.memoryId,
-                    userId: req.body.userId,
+                    memoryId: reportBody.memoryId,
+                    userId: reportBody.userId,
                 },
             })
                 .then(report => {
@@ -169,7 +217,9 @@ memoryRouter.post('/reports', async function(req, res) {
                             })
                             .catch(function(err) {
                                 console.log(err);
-                                res;
+                                res.status(HttpStatus.BAD_REQUEST).json({
+                                    message: 'Error creating report'
+                                });
                                 throw 'Error creating report.';
                             });
                     } else {
@@ -184,15 +234,15 @@ memoryRouter.post('/reports', async function(req, res) {
                 });
         })
         .catch(function(err) {
-            console.log('MEMORY NOT FOUND');
+            console.log("MEMORY NOT FOUND")
             res.status(HttpStatus.BAD_REQUEST).send(err);
-        });
+        })
 });
 
 /**
  * API (GET) : getMemoryReportsById
  */
-memoryRouter.get('/reports/:id', function(req, res) {
+memoryRouter.get('/memories/reports/:id', function(req, res) {
     Report.findAndCountAll({
         where: {
             MemoryId: req.params.id,
@@ -203,6 +253,43 @@ memoryRouter.get('/reports/:id', function(req, res) {
                 res.status(HttpStatus.OK).send(reports);
             } else {
                 throw 'No reports on memory.';
+            }
+        })
+        .catch(function(err) {
+            res.send(err);
+        });
+});
+/**
+ * API (POST) : createCategory
+ */
+memoryRouter.post('/categories', function(req, res) {
+    let categoryBody = req.body;
+    Category.create(categoryBody)
+        .then(category => {
+            res.status(HttpStatus.CREATED).send(category);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(HttpStatus.BAD_REQUEST).send(
+                `Error while creating a category.`
+            );
+        });
+});
+
+/**
+ * API (GET) : getMemoriesByCategoryId
+ */
+memoryRouter.get('/categories/:id', function(req, res) {
+    Memory.findAndCountAll({
+        where: {
+            categoryId: req.params.id,
+        },
+    })
+        .then(memories => {
+            if (memories.count != 0) {
+                res.status(HttpStatus.OK).send(memories);
+            } else {
+                throw 'Category has no memories.';
             }
         })
         .catch(function(err) {
