@@ -15,7 +15,9 @@
         "debug": "~2.6.9",
         "dotenv": "^8.2.0",
         "express": "^4.17.1",
+        "express-openid-connect": "^0.6.0",
         "express-session": "^1.17.0",
+        "helmet": "^3.21.3",
         "http-errors": "~1.6.3",
         "http-status-codes": "^1.4.0",
         "jsonwebtoken": "^8.5.1",
@@ -24,6 +26,7 @@
         "mysql2": "^2.1.0",
         "nodemailer": "^6.4.4",
         "passport": "^0.4.1",
+        "passport-auth0": "^1.3.2",
         "passport-facebook": "^3.0.0",
         "passport-google-oauth": "^2.0.0",
         "passport-google-oauth20": "^2.0.0",
@@ -35,12 +38,5 @@
     },
     "devDependencies": {
         "nodemon": "^2.0.2"
-    },
-    "prettier": {
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "semi": true,
-        "singleQuote": true,
-        "printWidth": 80
     }
 }

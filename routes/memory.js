@@ -9,10 +9,7 @@ const { Op } = require('sequelize');
 const passport = require('passport');
 const sequelize = require('../config/db').sequelize;
 
-
-//middleware
-const verifyToken = require('../middleware/verifyToken.js')
-
+const secured = require('../middleware/secured')
 
 /**
  * API (GET) : getAllMemories
@@ -78,11 +75,11 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+memoryRouter.post('/memories', secured(), function(req, res) {
+    const { _raw, _json, ...userProfile } = req.user;
+    console.log(userProfile)
     let memoryBody = req.body;
-    let user = req.user;
-    memoryBody.userId = user.id;
-    console.log(memoryBody)
+    memoryBody['userId'] = userProfile.id
     Memory.create(memoryBody)
         .then(memory => {
             res.status(HttpStatus.CREATED).send(memory);
@@ -151,10 +148,9 @@ memoryRouter.put('/memories/:id', [verifyToken, passport.authenticate('jwt', {se
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', {session: false})], function(req, res) {
+memoryRouter.delete('/memories/:id', function(req, res) {
     let memoryId = req.params.id;
     let user = req.user;
-    console.log(user.id)
     Memory.destroy({
         where: {
             id: memoryId,
@@ -172,10 +168,24 @@ memoryRouter.delete('/memories/:id', [verifyToken, passport.authenticate('jwt', 
                 res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
-        .catch(err => {
-            console.error(err);
-        });
-});
+            .then(result => {
+                // result changes between 0 and 1 if memory is found
+                if (result) {
+                    // deleted memory
+                    res.status(HttpStatus.OK).send(
+                        `Deleted memory #${memoryId}`
+                    );
+                } else {
+                    // memory not found or client is trying to delete someone else's memory
+                    // TODO: admin user should never get this
+                    res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+            });
+    }
+);
 
 /**
  * API (POST) : createMemoryReport

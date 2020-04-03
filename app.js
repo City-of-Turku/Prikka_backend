@@ -16,7 +16,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 const logger = require('morgan');
-var cors = require('cors');
+const cors = require('cors');
+const helmet = require('helmet');
 
 //const db & models
 const models = require('./models/index');
@@ -24,16 +25,16 @@ const db = require('./config/db').sequelize;
 require('./config/auth.js')(passport);
 
 //middleware
-const verifyToken = require('./middleware/verifyToken.js')
+const secured = require('./middleware/secured')
+const verifyAdmin = require('./middleware/verifyAdmin');
 
 //Import routes
-const loginRouter = require('./routes/login');
+const authRouter = require('./routes/auth');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
 const categoryRouter = require('./routes/category');
-const registerRouter = require('./routes/register');
-const resetPasswordRouter = require('./routes/resetpassword');
+const adminRouter = require('./routes/admin');
 
 /* ---------------------
  *         MAIN
@@ -61,7 +62,7 @@ db.authenticate()
  */
 
 //TODO : issue, db.sync create new foreign keys each time
-db.sync({ alter: true })
+db.sync()
     .then(() => {
         console.log('Tables successfully synced.\n');
     })
@@ -82,18 +83,27 @@ app.use(
         extended: false,
     })
 );
-app.use(
-    session({
-        secret: 'slfo0jr4u7djhe7e83_dhg',
-        resave: true,
-        saveUninitialized: true,
-    })
-);
+var sess = {
+	secret: process.env['SESSION_SECRET'],
+	cookie: {
+		// httpOnly: true,
+		maxAge: Number(process.env['SESSION_MAX_AGE'])
+	},
+	resave: false,
+	saveUninitialized: true // create new session for all requests
+};
 
-// Initialize Passport and restore authentication state, if any,= require (the
-// session.
+if (app.get('env') === 'production') {
+	sess.cookie.secure = true;
+}
+
+app.use(session(sess))
+
+app.use(helmet())
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.use(flash());
 app.use(cors());
 app.use(logger('dev'));
@@ -103,11 +113,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/api/auth-management/login', loginRouter);
-app.use('/api/auth-management/register', registerRouter);
-app.use('/api/auth-management/resetPassword', resetPasswordRouter);
+app.use('/api/auth-management', authRouter);
 app.use('/api/memory-management', memoryRouter);
-app.use('/users', [verifyToken, passport.authenticate('jwt', {session: false})], usersRouter);
+app.use('/api/admin/', [secured(), verifyAdmin], adminRouter);
+app.use('/api/user-management', secured(), usersRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     next(createError(HttpStatus.NOT_FOUND, 'Not found'));
@@ -119,22 +128,18 @@ app.use((err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-    //set status for response
-    res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
-    // render the error page
+	//set status for response
+	res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
-    //res.render('error') //deactivated render, if not, the whole html page is send back as a response
-
-    //create response body
-    const data = {
-        message: err.message,
-        user: req.body,
-    };
+	//create response body
+	const data = {
+		message: err.message,
+		reqBody: req.body
+	};
 
     //send response ()
     res.send(data);
 
-    console.log();
 });
 
 module.exports = app;

@@ -1,0 +1,18 @@
+## extensions
+*.*
+Dockerfile
+LICENSE
+!*.css
+!*.graphql
+!*.js
+!*.json
+!*.md
+!*.ts
+!*.tsx
+!*.yml
+
+## same as in .gitignore
+/.next
+/build
+/locales/**/*.missing.json
+/node_modules
