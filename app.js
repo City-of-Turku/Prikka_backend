@@ -117,6 +117,7 @@ app.use('/api/auth-management', authRouter);
 app.use('/api/memory-management', memoryRouter);
 app.use('/api/admin/', [secured(), verifyAdmin], adminRouter);
 app.use('/api/user-management', secured(), usersRouter);
+app.use('/api/category-management', categoryRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     next(createError(HttpStatus.NOT_FOUND, 'Not found'));
