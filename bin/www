@@ -7,7 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('turkumemoriesbackend:server');
 var https = require('https');
-const fs = require('fs')
+var http = require('http');
+const fs = require('fs');
 
 const key = fs.readFileSync('certs/localhost-key.pem');
 const cert = fs.readFileSync('certs/localhost.pem');
@@ -23,8 +24,13 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
-var server = https.createServer({key, cert}, app);
+if (process.env['NODE_ENV'] === 'production') {
+    console.log('Creating HTTPS server - with certs')
+    var server = https.createServer({key, cert}, app);
+} else {
+    console.log('Creating HTTP server - No certs')
+    var server = http.createServer(app)
+}
 
 /**
  * Listen on provided port, on all network interfaces.

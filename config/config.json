@@ -11,16 +11,22 @@
     },
     "test": {
         "username": "root",
-        "password": "",
-        "database": "myturkumemory_db",
-        "host": "localhost",
-        "dialect": "mysql"
+        "password": "password",
+        "database": "myturkumemories_db",
+        "options": {
+            "host": "localhost",
+            "port": 3306,
+            "dialect": "mysql"
+        }
     },
     "production": {
         "username": "root",
-        "password": "",
-        "database": "myturkumemory_db",
-        "host": "localhost",
-        "dialect": "mysql"
+        "password": "password",
+        "database": "myturkumemories_db",
+        "options": {
+            "host": "localhost",
+            "port": 3306,
+            "dialect": "mysql"
+        }
     }
 }
