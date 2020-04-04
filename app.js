@@ -14,6 +14,7 @@ const flash = require('connect-flash');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session)
 const passport = require('passport');
 const logger = require('morgan');
 const cors = require('cors');
@@ -88,7 +89,10 @@ var sess = {
 	cookie: {
 		// httpOnly: true,
 		maxAge: Number(process.env['SESSION_MAX_AGE'])
-	},
+    },
+    store: new MemoryStore({
+        checkPeriod: 86400000 // prune every 24h
+    }),
 	resave: false,
 	saveUninitialized: true // create new session for all requests
 };
