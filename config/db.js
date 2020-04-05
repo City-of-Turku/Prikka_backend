@@ -7,16 +7,20 @@
 const Sequelize = require('sequelize');
 const config = require('./config.json');
 
+// logger
+const logger = require('../config/winston');
+
 const env = process.env.NODE_ENV || 'development';
 const params = config[env];
-console.log(params);
+params['options']['logging'] = (msg) => logger.debug(msg); // better way to include this to options?
+logger.info(`Initiliazing database connection with ${process.env['NODE_ENV']} parameters`);
 
 //  config
 const sequelize = new Sequelize(
     params.database,
     params.username,
     params.password,
-    params.options
+    params.options,
 );
 
 const db = {};

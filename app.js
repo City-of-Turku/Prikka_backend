@@ -16,7 +16,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MemoryStore = require('memorystore')(session)
 const passport = require('passport');
-const logger = require('morgan');
+const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 
@@ -24,6 +24,9 @@ const helmet = require('helmet');
 const models = require('./models/index');
 const db = require('./config/db').sequelize;
 require('./config/auth.js')(passport);
+
+// logger
+const logger = require('./config/winston');
 
 //middleware
 const secured = require('./middleware/secured')
@@ -43,17 +46,17 @@ const adminRouter = require('./routes/admin');
 const app = express();
 
 if (env.error) {
-    console.error('FATAL ERROR: .env file is not defined');
+    logger.error('FATAL ERROR: .env file is not defined');
     process.exit(1);
 }
 
 // database setup here
 db.authenticate()
     .then(() => {
-        console.log('Connection has been established successfully.\n');
+        logger.info('Connection has been established successfully.\n');
     })
     .catch(err => {
-        console.error('Unable to connect to the database:', err);
+        logger.error('Unable to connect to the database:', err);
     });
 
 /*
@@ -65,10 +68,10 @@ db.authenticate()
 //TODO : issue, db.sync create new foreign keys each time
 db.sync()
     .then(() => {
-        console.log('Tables successfully synced.\n');
+        logger.info('Tables successfully synced.');
     })
     .catch(err => {
-        console.error('Error syncing tables:', err, '\n');
+        logger.error('Error syncing tables:', err);
     });
 
 // view engine setup
@@ -110,7 +113,9 @@ app.use(passport.session());
 
 app.use(flash());
 app.use(cors());
-app.use(logger('dev'));
+// combine morgan's logs to winston's logs
+app.use(morgan('combined', { stream: logger.stream}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -132,7 +137,8 @@ app.use((err, req, res, next) => {
     //set locals for dev
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
-
+    // log error
+    logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
 	//set status for response
 	res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
 

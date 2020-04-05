@@ -1,4 +1,6 @@
 const Auth0Strategy = require('passport-auth0');
+// logger
+const logger = require('../config/winston');
 
 const models = require('../models/index');
 const createError = require('http-errors');
