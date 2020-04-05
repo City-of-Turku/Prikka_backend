@@ -10,6 +10,8 @@ var https = require('https');
 var http = require('http');
 const fs = require('fs');
 
+const logger = require('../config/winston');
+
 const key = fs.readFileSync('certs/localhost-key.pem');
 const cert = fs.readFileSync('certs/localhost.pem');
 
@@ -25,10 +27,10 @@ app.set('port', port);
  * Create HTTP server.
  */
 if (process.env['NODE_ENV'] === 'production') {
-    console.log('Creating HTTPS server - with certs')
+    logger.info('Creating HTTPS server - with certs')
     var server = https.createServer({key, cert}, app);
 } else {
-    console.log('Creating HTTP server - No certs')
+    logger.info('Creating HTTP server - No certs')
     var server = http.createServer(app)
 }
 
@@ -37,7 +39,7 @@ if (process.env['NODE_ENV'] === 'production') {
  */
 
 server.listen(port, hostname, () => {
-    console.log(`Listening on port ${port}`);
+    logger.info(`Listening on port ${port}`);
 });
 server.on('error', onError);
 server.on('listening', onListening);
@@ -76,11 +78,11 @@ function onError(error) {
     // handle specific listen errors with friendly messages
     switch (error.code) {
         case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
+            logger.error(bind + ' requires elevated privileges');
             process.exit(1);
             break;
         case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
+            logger.error(bind + ' is already in use');
             process.exit(1);
             break;
         default:

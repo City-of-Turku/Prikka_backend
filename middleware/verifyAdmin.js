@@ -1,15 +1,17 @@
 const _ = require('lodash')
+// logger
+const logger = require('../config/winston');
 
 function checkAdmin(req, res, next) {
     if (_.isEmpty(req.user)) {
-        console.log(`User is ${req.user}`)
+        logger.info(`User is ${req.user}`)
         return res.status(401).send('Not logged in')
     }
     if (req.user.admin) {
-        console.log('Admin user')
+        logger.info('Admin user')
         next();
     } else {
-        console.log('Not an admin user');
+        logger.info('Not an admin user');
         return res.status(403).send('Forbidden')
     }
 }

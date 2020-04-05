@@ -9,6 +9,9 @@ const { Op } = require('sequelize');
 const passport = require('passport');
 const sequelize = require('../config/db').sequelize;
 
+// logger
+const logger = require('../config/winston');
+
 const secured = require('../middleware/secured')
 
 /**
@@ -29,7 +32,7 @@ memoryRouter.get('/memories', function(req, res) {
     filters.include = [
         {
             model: User,
-            attributes: ['username']
+            attributes: ['displayName']
         }, 
         {
             model: Report,
@@ -57,9 +60,10 @@ memoryRouter.get('/memories', function(req, res) {
         filters.limit = maxPerRequest;
     }
 
-    console.log(filters);
+    logger.info(filters);
     Memory.findAndCountAll(filters)
         .then(memories => {
+            logger.info(`sending memories to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             if (memories.count != 0) {
                 res.status(HttpStatus.OK).send(memories);
             } else {
@@ -67,7 +71,7 @@ memoryRouter.get('/memories', function(req, res) {
             }
         })
         .catch(function(err) {
-            console.log(err);
+            logger.error(err);
             res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
         });
 });
@@ -77,15 +81,15 @@ memoryRouter.get('/memories', function(req, res) {
  */
 memoryRouter.post('/memories', secured(), function(req, res) {
     const { _raw, _json, ...userProfile } = req.user;
-    console.log(userProfile)
     let memoryBody = req.body;
     memoryBody['userId'] = userProfile.id
     Memory.create(memoryBody)
         .then(memory => {
+            logger.info(`User ${userProfile.id} created memory ${JSON.stringify(memory)}`)
             res.status(HttpStatus.CREATED).send(memory);
         })
         .catch(err => {
-            console.log(err);
+            logger.error(err);
             res.status(HttpStatus.BAD_REQUEST).send(
                 `Error while creating a memory.`
             );
@@ -101,7 +105,7 @@ memoryRouter.get('/memories/:id', function(req, res) {
         [
             {
                 model: User,
-                attributes: ['username']
+                attributes: ['displayName']
             }, 
             {
                 required: true,
@@ -115,10 +119,11 @@ memoryRouter.get('/memories/:id', function(req, res) {
         
     })
         .then(memory => {
-            console.log(memory.reports)
+            logger.info(`Sending memory to client, ${req.originalUrl} - ${req.method} - ${req.ip}`)
             res.status(HttpStatus.OK).send(memory);
         })
         .catch(function(err) {
+            logger.error(err)
             res.status(HttpStatus.NOT_FOUND).send(err);
         });
 });
@@ -132,15 +137,17 @@ memoryRouter.put('/memories/:id', secured(), function(req, res) {
     Memory.findOne({
         where: {
             id: memoryId,
-            userId: user.name
+            userId: user.id
         },
     })
         .then(memory => {
+            logger.info(`Updated memory, used: ${user.id} ${req.originalUrl} - ${req.method} - ${req.ip}`)
             let memoryBody = req.body;
             memory.update(memoryBody);
             res.send(memory);
         })
         .catch(function(err) {
+            logger.error(err)
             res.status(HttpStatus.NOT_FOUND).send(`Memory not found.`);
         });
 });
@@ -148,7 +155,7 @@ memoryRouter.put('/memories/:id', secured(), function(req, res) {
 /**
  * API (DELETE) : deleteMemoryById
  */
-memoryRouter.delete('/memories/:id', function(req, res) {
+memoryRouter.delete('/memories/:id', secured(), function(req, res) {
     let memoryId = req.params.id;
     let user = req.user;
     Memory.destroy({
@@ -160,6 +167,7 @@ memoryRouter.delete('/memories/:id', function(req, res) {
         .then(result => {
             // result changes between 0 and 1 if memory is found
             if (result) {
+                logger.info(`User ${userId} deleted memory ${memoryId}`)
                 // deleted memory
                 res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
             } else {
@@ -168,21 +176,21 @@ memoryRouter.delete('/memories/:id', function(req, res) {
                 res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
-            .then(result => {
-                // result changes between 0 and 1 if memory is found
-                if (result) {
-                    // deleted memory
-                    res.status(HttpStatus.OK).send(
-                        `Deleted memory #${memoryId}`
-                    );
-                } else {
-                    // memory not found or client is trying to delete someone else's memory
-                    // TODO: admin user should never get this
-                    res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
-                }
-            })
+            // .then(result => {
+            //     // result changes between 0 and 1 if memory is found
+            //     if (result) {
+            //         // deleted memory
+            //         res.status(HttpStatus.OK).send(
+            //             `Deleted memory #${memoryId}`
+            //         );
+            //     } else {
+            //         // memory not found or client is trying to delete someone else's memory
+            //         // TODO: admin user should never get this
+            //         res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
+            //     }
+            // })
             .catch(err => {
-                console.error(err);
+                logger.error(err);
             });
     }
 );
@@ -194,14 +202,13 @@ memoryRouter.post('/reports', secured(), function(req, res) {
     let user = req.user;
     let reportBody = req.body;
     reportBody.userId = user.id;
-    console.log(reportBody)
     Memory.findOne({
         where: {
             id: reportBody.memoryId
         },
     })
         .then(memory => {
-            console.log('MEMORY FOUND');
+            logger.info('MEMORY FOUND');
             Report.findOne({
                 where: {
                     memoryId: reportBody.memoryId,
@@ -213,10 +220,11 @@ memoryRouter.post('/reports', secured(), function(req, res) {
                         // If existing report on memory is not found, new report is created.
                         Report.create(reportBody)
                             .then(report => {
+                                logger.info(`user ${user.id} reported memory ${reportBody.memoryId}`)
                                 res.status(HttpStatus.CREATED).send(report);
                             })
                             .catch(function(err) {
-                                console.log(err);
+                                logger.error(err);
                                 res.status(HttpStatus.BAD_REQUEST).json({
                                     message: 'Error creating report'
                                 });
@@ -229,12 +237,12 @@ memoryRouter.post('/reports', secured(), function(req, res) {
                     }
                 })
                 .catch(function(err) {
-                    console.log(err);
+                    logger.error(err);
                     res.status(HttpStatus.BAD_REQUEST).send(err);
                 });
         })
         .catch(function(err) {
-            console.log("MEMORY NOT FOUND")
+            logger.error(`Memory not found: ${err}`)
             res.status(HttpStatus.BAD_REQUEST).send(err);
         })
 });
@@ -250,51 +258,34 @@ memoryRouter.get('/memories/reports/:id', function(req, res) {
     })
         .then(reports => {
             if (reports.count != 0) {
+                logger.info(`sending list of reports on memory ${req.params.id} to client`)
                 res.status(HttpStatus.OK).send(reports);
             } else {
                 throw 'No reports on memory.';
             }
         })
         .catch(function(err) {
+            logger.error(err)
             res.send(err);
         });
 });
 /**
  * API (POST) : createCategory
  */
-memoryRouter.post('/categories', function(req, res) {
-    let categoryBody = req.body;
-    Category.create(categoryBody)
-        .then(category => {
-            res.status(HttpStatus.CREATED).send(category);
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(HttpStatus.BAD_REQUEST).send(
-                `Error while creating a category.`
-            );
-        });
-});
+// memoryRouter.post('/categories', function(req, res) {
+//     let categoryBody = req.body;
+//     Category.create(categoryBody)
+//         .then(category => {
+//             res.status(HttpStatus.CREATED).send(category);
+//         })
+//         .catch(err => {
+//             logger.error(err);
+//             res.status(HttpStatus.BAD_REQUEST).send(
+//                 `Error while creating a category.`
+//             );
+//         });
+// });
 
-/**
- * API (GET) : getMemoriesByCategoryId
- */
-memoryRouter.get('/categories/:id', function(req, res) {
-    Memory.findAndCountAll({
-        where: {
-            categoryId: req.params.id,
-        },
-    })
-        .then(memories => {
-            if (memories.count != 0) {
-                res.status(HttpStatus.OK).send(memories);
-            } else {
-                throw 'Category has no memories.';
-            }
-        })
-        .catch(function(err) {
-            res.send(err);
-        });
-});
+
 
 module.exports = memoryRouter;
