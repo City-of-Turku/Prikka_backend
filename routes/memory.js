@@ -8,6 +8,9 @@ const memoryRouter = express.Router();
 const { Op } = require('sequelize');
 const passport = require('passport');
 const sequelize = require('../config/db').sequelize;
+const multer = require('multer');
+const upload = multer({dest: './public/uploads/'})
+const fs = require('fs');
 
 // logger
 const logger = require('../config/winston');
@@ -79,13 +82,17 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', secured(), function(req, res) {
+memoryRouter.post('/memories', upload.single("file"), secured(), function(req, res) {
     const { _raw, _json, ...userProfile } = req.user;
     let memoryBody = req.body;
+    memoryBody['position'] = JSON.parse(memoryBody['position']);
     memoryBody['userId'] = userProfile.id
+    memoryBody['photo'] = req.file;
+    console.log(memoryBody)
     Memory.create(memoryBody)
         .then(memory => {
             logger.info(`User ${userProfile.id} created memory ${JSON.stringify(memory)}`)
+            console.log(memory)
             res.status(HttpStatus.CREATED).send(memory);
         })
         .catch(err => {
