@@ -55,11 +55,15 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', secured(), function(req, res) {
-    const { _raw, _json, ...userProfile } = req.user;
-    console.log(userProfile);
+memoryRouter.post('/memories', function(req, res) {
+    let userId = null;
+
+    if (req.user) {
+        userId = req.user.id;
+    }
+
     let memoryBody = req.body;
-    memoryBody['userId'] = userProfile.id;
+    memoryBody['userId'] = userId;
     Memory.create(memoryBody)
         .then(memory => {
             res.status(HttpStatus.CREATED).send(memory);
@@ -144,6 +148,15 @@ memoryRouter.delete('/memories/:id', function(req, res) {
  */
 memoryRouter.post('/reports', async function(req, res) {
     let reportBody = req.body;
+
+    //if anonymous
+    let userId = null;
+
+    //If loggedIn
+    if (req.user) {
+        userId = req.user.id;
+    }
+
     Memory.findOne({
         where: {
             id: req.body.memoryId,
@@ -154,7 +167,7 @@ memoryRouter.post('/reports', async function(req, res) {
             Report.findOne({
                 where: {
                     memoryId: req.body.memoryId,
-                    userId: req.body.userId,
+                    userId: userId,
                 },
             })
                 .then(report => {

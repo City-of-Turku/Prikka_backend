@@ -60,16 +60,25 @@ authRouter.get('/logout', (req, res) => {
 });
 
 authRouter.get('/logged', (req, res) => {
-    if (req.user) {
+    let isAdmin = false;
+    let isLogged = false;
+
+    try {
+        if (req.user) {
+            isLogged = true;
+
+            if (req.user.admin) {
+                isAdmin = true;
+            }
+        }
+
         res.status(HttpStatus.OK).json({
             message: 'User status',
-            logged: true,
+            isLogged: isLogged,
+            isAdmin: isAdmin,
         });
-    } else {
-        res.status(HttpStatus.OK).json({
-            message: 'User status',
-            logged: false,
-        });
+    } catch (err) {
+        console.log(err);
     }
 });
 
