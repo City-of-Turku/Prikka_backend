@@ -131,7 +131,7 @@ tmp/
 temp/
 
 # Images
-public/upload/
+public/uploads/
 
 # End of https://www.gitignore.io/api/git,node,code
 
