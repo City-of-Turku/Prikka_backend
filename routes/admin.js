@@ -100,7 +100,7 @@ adminRouter.put('/auth-management/user/:id', function(req, res) {
 				});
 			})
 			.catch((err) => {
-				logger.error(err);
+				logger.error(`${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 				res.status(HttpStatus.OK).json({
 					message: 'Something went wrong'
 				});
@@ -134,7 +134,10 @@ adminRouter.delete('/auth-management/user/:id', function(req, res) {
 				}
 			})
 			.catch((err) => {
-				logger.error(err);
+				logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+				res.status(HttpStatus.BAD_REQUEST).json({
+					message: 'Bad request'
+				});
 			});
 	}
 });
@@ -159,11 +162,34 @@ adminRouter.delete('/auth-management/reports/:id', function(req, res) {
 			}
 		})
 		.catch((err) => {
-			logger.error(err);
+			logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
 			res.status(HttpStatus.BAD_REQUEST).json({
 				message: 'Bad request'
 			});
 		});
+});
+
+/**
+ * API (GET) : getMemoryReportsById *** MOVED FROM memory.js ***
+ */
+adminRouter.get('/memory-management/reports/:id', function(req, res) {
+    Report.findAndCountAll({
+        where: {
+            MemoryId: req.params.id,
+        },
+    })
+        .then(reports => {
+            if (reports.count != 0) {
+                logger.info(`sending list of reports on memory ${req.params.id} to client`)
+                res.status(HttpStatus.OK).send(reports);
+            } else {
+                throw 'No reports on memory.';
+            }
+        })
+        .catch(function(err) {
+            logger.error(err)
+            res.send(err);
+        });
 });
 
 /* 
@@ -187,7 +213,7 @@ adminRouter.post('/category-management/categories', function(req, res) {
 		})
 		.catch(Sequelize.UniqueConstraintError, (err) => {
 			logger.info(
-				`User ${req.user.id} tried creating new category ${JSON.stringify(newCategory)} but failed: ${err}`
+				`User ${req.user.id} tried creating new category but failed: ${err}`
 			);
 			res.status(HttpStatus.BAD_REQUEST).json({
 				message: 'Category with that name already exists. Category name must be unique'
@@ -195,6 +221,7 @@ adminRouter.post('/category-management/categories', function(req, res) {
 		})
 		.catch((err) => {
 			logger.error(err);
+			console.log('aasadasdasdd',err)
 			res.status(HttpStatus.BAD_REQUEST).json({
 				message: 'Bad request'
 			});

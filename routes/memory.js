@@ -247,28 +247,7 @@ memoryRouter.post('/reports', secured(), function(req, res) {
         })
 });
 
-/**
- * API (GET) : getMemoryReportsById
- */
-memoryRouter.get('/memories/reports/:id', function(req, res) {
-    Report.findAndCountAll({
-        where: {
-            MemoryId: req.params.id,
-        },
-    })
-        .then(reports => {
-            if (reports.count != 0) {
-                logger.info(`sending list of reports on memory ${req.params.id} to client`)
-                res.status(HttpStatus.OK).send(reports);
-            } else {
-                throw 'No reports on memory.';
-            }
-        })
-        .catch(function(err) {
-            logger.error(err)
-            res.send(err);
-        });
-});
+
 /**
  * API (POST) : createCategory
  */

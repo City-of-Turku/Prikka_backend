@@ -17,7 +17,7 @@ categoryRouter.post('/categories', function(req, res) {
             res.status(HttpStatus.CREATED).send(category);
         })
         .catch(err => {
-            logger.error(err);
+            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             res.status(HttpStatus.BAD_REQUEST).send(
                 `Error while creating a category.`
             );
@@ -32,14 +32,14 @@ categoryRouter.get('/categories', function(req, res) {
         attributes: ['name', 'description', 'id'],
     })
         .then(categories => {
-            logger.info(`List of categories sent - ${req.user.id}`)
+            logger.info(`List of categories sent - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             res.status(HttpStatus.OK).json({
                 message: 'Found these categories',
                 categories: categories,
             });
         })
         .catch(err => {
-            logger.error(err);
+            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             res.status(HttpStatus.BAD_REQUEST).json({
                 message: 'Bad request',
             });
@@ -63,7 +63,7 @@ categoryRouter.get('/categories/:id', function(req, res) {
             }
         })
         .catch(function(err) {
-            logger.error(err)
+            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             res.send(err);
         });
 });
