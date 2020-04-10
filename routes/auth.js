@@ -13,18 +13,15 @@ const logger = require('../config/winston');
 const authRouter = express.Router();
 
 // Perform the login, after login Auth0 will redirect to callback
-authRouter.get(
-	'/login',
-	passport.authenticate('auth0', {
+authRouter.get('/login',passport.authenticate('auth0', {
 		scope: 'openid email profile'
 	}),
 	function(req, res) {
 		res.redirect('/');
 	}
 );
-// res.redirect(`${process.env['HOSTNAME']}:${process.env['FRONTEND_PORT']}`);
 
-// Perform the final stage of authentication and redirect to previously requested URL or '/user'
+// Perform the final stage of authentication and redirect to frontend
 authRouter.get('/callback', function(req, res, next) {
 	passport.authenticate('auth0', function(err, user, info) {
 		if (err) {
@@ -46,13 +43,15 @@ authRouter.get('/callback', function(req, res, next) {
 });
 
 authRouter.get('/logout', (req, res) => {
-  logger.info(`${req.user.id} logged out`)
+	logger.info(`${req.user.id} logged out`);
+
 	req.logout();
-	var returnTo = req.protocol + '://' + req.hostname;
-	var port = req.connection.localPort;
-	if (port !== undefined && port !== 80 && port !== 443) {
-		returnTo += ':' + port;
-	}
+
+	var returnTo = process.env.FRONTEND_LOCATION;
+	//var port = req.connection.localPort;
+	//if (port !== undefined && port !== 80 && port !== 443) {
+	//   returnTo += ':' + port;
+	//}
 	var logoutURL = new url.URL(util.format('https://%s/v2/logout', process.env.AUTH0_DOMAIN));
 	var searchString = querystring.stringify({
 		client_id: process.env.AUTH0_CLIENT_ID,
@@ -64,18 +63,28 @@ authRouter.get('/logout', (req, res) => {
 });
 
 authRouter.get('/logged', (req, res) => {
-	if (req.user) {
+	logger.info(`Checking for logged in status. ${req.user.id}`);
+	let isAdmin = false;
+	let isLogged = false;
+
+	try {
+		if (req.user) {
+			isLogged = true;
+
+			if (req.user.admin) {
+				isAdmin = true;
+			}
+		}
+
 		res.status(HttpStatus.OK).json({
 			message: 'User status',
-			logged: true
+			isLogged: isLogged,
+			isAdmin: isAdmin
 		});
-	} else {
-		res.status(HttpStatus.OK).json({
-			message: 'User status',
-			logged: false
-    });
-  }
-  logger.info(`Checking for logged in status. ${req.user.id}`)
+	} catch (err) {
+		logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+	}
 });
+
 
 module.exports = authRouter;
