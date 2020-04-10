@@ -47,7 +47,7 @@ const Memory = sequelize.define(
             },
         },
         photo: {
-            type: DataTypes.BLOB
+            type: DataTypes.JSON
         },
         position: {
             type: DataTypes.GEOMETRY('POINT'),

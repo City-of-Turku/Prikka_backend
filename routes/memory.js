@@ -9,13 +9,26 @@ const { Op } = require('sequelize');
 const passport = require('passport');
 const sequelize = require('../config/db').sequelize;
 const multer = require('multer');
-const upload = multer({dest: './public/uploads/'})
 const fs = require('fs');
 
 // logger
 const logger = require('../config/winston');
 
 const secured = require('../middleware/secured')
+
+const upload = multer({
+    dest: './public/uploads/',
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+            cb(null, true);
+        }
+        else {
+            cb(null, false);
+            return cb(new Error('Only .png, .jpg and .jpeg format allowed!'));
+        }
+    },
+    limits: { fileSize:  10 * 1024 * 1024 }
+})
 
 /**
  * API (GET) : getAllMemories
@@ -82,12 +95,16 @@ memoryRouter.get('/memories', function(req, res) {
 /**
  * API (POST) : createMemory
  */
-memoryRouter.post('/memories', upload.single("file"), secured(), function(req, res) {
+memoryRouter.post('/memories', upload.single("file"), secured(), function(req, res) { 
     const { _raw, _json, ...userProfile } = req.user;
     let memoryBody = req.body;
-    memoryBody['position'] = JSON.parse(memoryBody['position']);
-    memoryBody['userId'] = userProfile.id
-    memoryBody['photo'] = req.file;
+    const file = req.file;
+    const position = JSON.parse(memoryBody['position']);
+    console.log(req.body)
+    
+    memoryBody['position'] = position;
+    memoryBody['userId'] = userProfile.id;
+    memoryBody['photo'] = file;
     console.log(memoryBody)
     Memory.create(memoryBody)
         .then(memory => {
