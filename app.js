@@ -26,7 +26,7 @@ const db = require('./config/db').sequelize;
 require('./config/auth.js')(passport);
 
 //middleware
-const secured = require('./middleware/secured')
+const secured = require('./middleware/secured');
 const verifyAdmin = require('./middleware/verifyAdmin');
 
 //Import routes
@@ -98,12 +98,12 @@ var sess = {
 };
 
 if (app.get('env') === 'production') {
-	sess.cookie.secure = true;
+    sess.cookie.secure = true;
 }
 
-app.use(session(sess))
+app.use(session(sess));
 
-app.use(helmet())
+app.use(helmet());
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -133,18 +133,17 @@ app.use((err, req, res, next) => {
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-	//set status for response
-	res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
+    //set status for response
+    res.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR);
 
-	//create response body
-	const data = {
-		message: err.message,
-		reqBody: req.body
-	};
+    //create response body
+    const data = {
+        message: err.message,
+        reqBody: req.body,
+    };
 
     //send response ()
     res.send(data);
-
 });
 
 module.exports = app;
