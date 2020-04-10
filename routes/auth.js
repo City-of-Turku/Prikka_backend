@@ -63,7 +63,7 @@ authRouter.get('/logout', (req, res) => {
 });
 
 authRouter.get('/logged', (req, res) => {
-	logger.info(`Checking for logged in status. ${req.user.id}`);
+	
 	let isAdmin = false;
 	let isLogged = false;
 
@@ -75,7 +75,7 @@ authRouter.get('/logged', (req, res) => {
 				isAdmin = true;
 			}
 		}
-
+		logger.info(`Checking for logged in status. ${req.ip} - logged in:${isLogged} - admin: ${isAdmin}`);
 		res.status(HttpStatus.OK).json({
 			message: 'User status',
 			isLogged: isLogged,
