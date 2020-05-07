@@ -102,14 +102,36 @@ memoryRouter.post('/memories', upload.single("file"), function(req, res) {
         userId = req.user.id;
     }
 
+    // Debug -------------------------
+    console.log(req.body);
+    console.log(req.file);
+    console.log(req.body.ispostman);
+
     let memoryBody = req.body;
     const file = req.file;
-    const position = JSON.parse(memoryBody['position']);
-    console.log(req.body)
-    
-    memoryBody['position'] = position;
-    memoryBody['userId'] = userId;
-    memoryBody['photo'] = file;
+
+    // Postman debugging -------------------------
+    let isPostman = req.body.ispostman;
+    if (isPostman == "true") {
+        console.log("*** Postman call, special variable names ***********");
+        let postmanBody = memoryBody.body;
+        let jsonBody =  JSON.parse(postmanBody);
+        memoryBody['title'] = jsonBody.title;
+        memoryBody['description'] = jsonBody.description;
+        memoryBody['position'] = jsonBody.position;
+        memoryBody['userId'] = userId;
+        memoryBody['photo'] = file;
+    }
+
+    // isPostman variable is undefined normally
+    if (isPostman != "true") {
+        const position = JSON.parse(memoryBody['position']);
+        console.log(req.body)
+        memoryBody['position'] = position;
+        memoryBody['userId'] = userId;
+        memoryBody['photo'] = file;
+    }
+
     console.log(memoryBody)
     Memory.create(memoryBody)
         .then(memory => {
