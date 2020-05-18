@@ -17,7 +17,7 @@ const logger = require('../config/winston');
 const secured = require('../middleware/secured')
 
 const upload = multer({
-    dest: './public/uploads/',
+    dest: process.env.IMAGE_UPLOAD_PATH,
     fileFilter: (req, file, cb) => {
         if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
             cb(null, true);
