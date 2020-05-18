@@ -59,6 +59,35 @@ adminRouter.delete('/memory-management/memories/:id', function(req, res) {
 		});
 });
 
+
+/*
+    USERS - GET USERS
+*/
+
+adminRouter.get('/auth-management/user', function(req, res) {
+	let filters = {
+		order: [['id', 'ASC']],
+	};
+
+	logger.info(filters);
+	User.findAndCountAll(filters)
+		.then(users => {
+			logger.info(`sending users to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+			if (users.count != 0) {
+				res.status(HttpStatus.OK).send(users);
+			} else {
+				throw 'No users to send';
+			}
+		})
+		.catch(function(err) {
+			logger.error(err);
+			res.status(HttpStatus.NOT_FOUND).send(`Users not found.`);
+		});
+
+	}
+);
+
+
 /*
     USERS - UPDATE/DELETE USERS
 */
@@ -142,6 +171,31 @@ adminRouter.delete('/auth-management/user/:id', function(req, res) {
 	}
 });
 
+
+/**
+ * API (GET) : getMemoryReportsById *** MOVED FROM memory.js ***
+ */
+adminRouter.get('/memory-management/reports/:id', function(req, res) {
+	Logger.arguments(req);
+	Report.findAndCountAll({
+		where: {
+			MemoryId: req.params.id,
+		},
+	})
+		.then(reports => {
+			if (reports.count != 0) {
+				logger.info(`sending list of reports on memory ${req.params.id} to client`)
+				res.status(HttpStatus.OK).send(reports);
+			} else {
+				throw 'No reports on memory.';
+			}
+		})
+		.catch(function(err) {
+			logger.error(err)
+			res.send(err);
+		});
+});
+
 /* 
     REPORTS - DELETE MEMORY REPORTS
 */
@@ -169,28 +223,6 @@ adminRouter.delete('/auth-management/reports/:id', function(req, res) {
 		});
 });
 
-/**
- * API (GET) : getMemoryReportsById *** MOVED FROM memory.js ***
- */
-adminRouter.get('/memory-management/reports/:id', function(req, res) {
-    Report.findAndCountAll({
-        where: {
-            MemoryId: req.params.id,
-        },
-    })
-        .then(reports => {
-            if (reports.count != 0) {
-                logger.info(`sending list of reports on memory ${req.params.id} to client`)
-                res.status(HttpStatus.OK).send(reports);
-            } else {
-                throw 'No reports on memory.';
-            }
-        })
-        .catch(function(err) {
-            logger.error(err)
-            res.send(err);
-        });
-});
 
 /* 
     CATEGORIES - CREATE/UPDATE/DELETE MEMORY CATEGORIES

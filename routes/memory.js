@@ -326,4 +326,108 @@ memoryRouter.get('/mymemories', function(req, res) {
     }
 });
 
+// This is here for test purpose only 18.5.2020 / RS
+memoryRouter.get('/reports/:id', function(req, res) {
+    Report.findAndCountAll({
+        where: {
+            MemoryId: req.params.id,
+        },
+    })
+        .then(reports => {
+            if (reports.count != 0) {
+                logger.info(`sending list of reports on memory ${req.params.id} to client`)
+                res.status(HttpStatus.OK).send(reports);
+            } else {
+                throw 'No reports on memory.';
+            }
+        })
+        .catch(function(err) {
+            logger.error(err)
+            res.send(err);
+        });
+});
+
+// Not in use but do not delete yet  18.5.2020 / RS
+memoryRouter.get('/reportedDistinct', function(req, res) {
+    Report.findAndCountAll({
+        attributes: [
+        // specify an array where the first element is the SQL function and the second is the alias
+        [sequelize.fn('DISTINCT', sequelize.col('memoryId')), 'memoryId']
+
+        // specify any additional columns
+        //'title'
+    ]})
+        .then(reports => {
+            if (reports.count != 0) {
+                logger.info(`sending list of distinct reported memory ids to client`);
+                //const asa = reports.valueOf();
+                //const memoryIds = JSON.parse(asa);
+
+
+                res.status(HttpStatus.OK).send(reports);
+            } else {
+                throw 'No reported memories.';
+            }
+        })
+        .catch(function(err) {
+            logger.error(err)
+            res.send(err);
+        });
+});
+
+/**
+ * API (GET) : getReportedMemories
+ */
+
+memoryRouter.get('/reportedMemories', function(req, res) {
+    let filters = {
+        order: [['id', 'ASC']],
+    };
+
+    filters.include = [
+        {
+            model: User,
+            attributes: ['displayName']
+        },
+        {
+            model: Report,
+            required: true,
+            attributes: ['id','description','memoryId','createdAt']
+        }
+    ];
+
+    filters.distinct = true
+
+    //Obtain GET request parameters
+    //filter by category
+    let categoriesParam = req.query.categoryId;
+    if (categoriesParam) {
+        let categoryIdList = categoriesParam.split(',');
+        filters.where = { categoryId: { [Op.or]: categoryIdList } };
+    }
+
+    //filter by category
+    let page = req.query.page;
+    if (page) {
+        let maxPerRequest = 10;
+        filters.offset = page * maxPerRequest;
+        filters.limit = maxPerRequest;
+    }
+
+    logger.info(filters);
+    Memory.findAndCountAll(filters)
+        .then(memories => {
+            logger.info(`sending memories to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+            if (memories.count != 0) {
+                res.status(HttpStatus.OK).send(memories);
+            } else {
+                throw 'No memory to send';
+            }
+        })
+        .catch(function(err) {
+            logger.error(err);
+            res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
+        });
+});
+
 module.exports = memoryRouter;
