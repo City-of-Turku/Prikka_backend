@@ -32,7 +32,6 @@ const Category = sequelize.define(
     },
     {
         timestamps: true,
-        updatedAt: false, // we don't want updatedAt
     }
 );
 

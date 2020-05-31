@@ -42,10 +42,12 @@ const upload = multer({
 
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
+//        attributes: [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']],
+//        group : ['id'],
+//        raw: true,
         order: [['id', 'ASC']],
     };
 
-    
     filters.include = [
         {
             model: User,
@@ -57,8 +59,8 @@ memoryRouter.get('/memories', function(req, res) {
             attributes: ['id']
         }
     ];
- 
-    filters.distinct = true
+
+    filters.distinct = true;
 
 
     //Obtain GET request parameters
@@ -67,6 +69,9 @@ memoryRouter.get('/memories', function(req, res) {
     if (categoriesParam) {
         let categoryIdList = categoriesParam.split(',');
         filters.where = { categoryId: { [Op.or]: categoryIdList } };
+//    TODO repostedMemories
+//    } else {
+//        filters.where = { categoryId: { [Op.or]: categoryIdList } };
     }
 
     //filter by category
@@ -287,25 +292,6 @@ memoryRouter.post('/reports', secured(), function(req, res) {
 
 
 /**
- * API (POST) : createCategory
- */
-// memoryRouter.post('/categories', function(req, res) {
-//     let categoryBody = req.body;
-//     Category.create(categoryBody)
-//         .then(category => {
-//             res.status(HttpStatus.CREATED).send(category);
-//         })
-//         .catch(err => {
-//             logger.error(err);
-//             res.status(HttpStatus.BAD_REQUEST).send(
-//                 `Error while creating a category.`
-//             );
-//         });
-// });
-
-
-
-/**
  * API (GET) : getUserMemories
  */
 memoryRouter.get('/mymemories', function(req, res) {
@@ -393,11 +379,14 @@ memoryRouter.get('/reportedMemories', function(req, res) {
         {
             model: Report,
             required: true,
-            attributes: ['id','description','memoryId','createdAt']
+            attributes: ['id','description','memoryId','createdAt','updatedAt', 'invalid']
         }
     ];
 
-    filters.distinct = true
+    filters.distinct = true;
+    filters.where = {
+        archiveDate: null
+    }
 
     //Obtain GET request parameters
     //filter by category

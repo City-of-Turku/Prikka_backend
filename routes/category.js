@@ -8,23 +8,6 @@ const logger = require('../config/winston');
 const categoryRouter = express.Router();
 
 /**
- * API (POST) : createCategory
- */
-categoryRouter.post('/categories', function(req, res) {
-    let categoryBody = req.body;
-    Category.create(categoryBody)
-        .then(category => {
-            res.status(HttpStatus.CREATED).send(category);
-        })
-        .catch(err => {
-            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
-            res.status(HttpStatus.BAD_REQUEST).send(
-                `Error while creating a category.`
-            );
-        });
-});
-
-/**
  * API (GET) : getAllCategories
  */
 categoryRouter.get('/categories', function(req, res) {
