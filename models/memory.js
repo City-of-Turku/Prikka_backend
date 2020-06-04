@@ -52,6 +52,18 @@ const Memory = sequelize.define(
         photo: {
             type: DataTypes.JSON
         },
+        photographer: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        whenIsPhotoTaken: {
+            type: DataTypes.STRING,
+                allowNull: true,
+        },
+        whereIsPhotoTaken: {
+            type: DataTypes.STRING,
+                allowNull: true,
+        },
         position: {
             type: DataTypes.GEOMETRY('POINT'),
             allowNull: false,
