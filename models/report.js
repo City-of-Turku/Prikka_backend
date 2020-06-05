@@ -30,7 +30,7 @@ const Report = sequelize.define(
         },
         invalid: {
             type: DataTypes.BOOLEAN,
-            allowNull: false,
+            allowNull: true,
             default: false
         },
         adminUserId: {

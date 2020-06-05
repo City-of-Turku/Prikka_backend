@@ -246,7 +246,10 @@ adminRouter.put('/auth-management/reports/:id', function(req, res) {
 		.then((result) => {
 			if (result[0]) {
 				logger.info(`User ${req.user.id} updated report with id ${reportId}, invalid: ${updatedReport.invalid}`);
-				res.status(HttpStatus.OK).send(`Report updated`);
+				res.status(HttpStatus.OK).json({
+					message: 'Report created',
+					category: updatedReport
+				});
 			} else {
 				res.status(HttpStatus.NOT_FOUND).send(`No such report`);
 			}
