@@ -112,9 +112,9 @@ adminRouter.get('/auth-management/user', function(req, res) {
 */
 
 adminRouter.put('/auth-management/user/:id', function(req, res) {
-	let updatedUser = _.pick(req.body, [ 'displayName', 'email', 'admin' ]);
+	let updatedUser = _.pick(req.body, [ 'userName', 'displayName', 'email', 'admin' ]);
 	let userId = req.params.id;
-	logger.info(`User ${req.user.id} tries to update user ${userId}; displayname: ${updatedUser.displayName}, e-mail: ${updatedUser.email}, admin: ${updatedUser.admin}`);
+	logger.info(`User ${req.user.id} tries to update user ${userId}; username: ${updatedUser.userName}, displayname: ${updatedUser.displayName}, e-mail: ${updatedUser.email}, admin: ${updatedUser.admin}`);
 
 	if (_.isEmpty(updatedUser || req.user.id === userId)) {
 		res.status(HttpStatus.BAD_REQUEST).json({
@@ -125,7 +125,7 @@ adminRouter.put('/auth-management/user/:id', function(req, res) {
 			where: {
 				id: userId
 			},
-			fields: [ 'displayName', 'email', 'admin' ]
+			fields: [ 'userName', 'displayName', 'email', 'admin' ]
 		})
 			.then((result) => {
 				if (result[0]) {

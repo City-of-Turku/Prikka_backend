@@ -30,6 +30,10 @@ const User = sequelize.define(
             allowNull: false,
             primaryKey: true
         },
+        userName: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -44,7 +48,11 @@ const User = sequelize.define(
         admin: {
             type: DataTypes.BOOLEAN,
             allowNull: false
-        }
+        },
+        yearOfBirth: {
+            type: DataTypes.CHAR( 4),
+            allowNull: true,
+        },
     },
     
     {

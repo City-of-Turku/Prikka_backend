@@ -374,7 +374,7 @@ memoryRouter.get('/reportedMemories', function(req, res) {
     filters.include = [
         {
             model: User,
-            attributes: ['displayName']
+            attributes: ['userName', 'displayName']
         },
         {
             model: Report,
