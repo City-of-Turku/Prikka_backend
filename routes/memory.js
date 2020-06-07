@@ -39,7 +39,6 @@ const upload = multer({
  * - page : offset, to get memories 10 by 10 from database (reduce server load)
  *
  */
-
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
 //        attributes: [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']],
@@ -97,6 +96,7 @@ memoryRouter.get('/memories', function(req, res) {
             res.status(HttpStatus.NOT_FOUND).send(`Memories not found.`);
         });
 });
+
 
 /**
  * API (POST) : createMemory
@@ -296,12 +296,25 @@ memoryRouter.post('/reports', secured(), function(req, res) {
  */
 memoryRouter.get('/mymemories', function(req, res) {
     let user = req.user;
+    let filters = {
+        order: [['createdAt', 'DESC']],
+    };
+
+    filters.include = [
+        {
+            model: User,
+            attributes: ['displayName']
+        }
+    ];
+
+    filters.where = [
+        {
+            userId: user.id,
+        }
+    ];
+
     if (req.user) {
-        Memory.findAndCountAll({
-            where: {
-                userId: user.id,
-            },
-        })
+        Memory.findAndCountAll(filters)
             .then(memories => {
                 res.status(HttpStatus.OK).send(memories);
             })
