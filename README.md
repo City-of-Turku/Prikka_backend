@@ -22,8 +22,12 @@
 
 ### Removed 'alter' argument from db.sync() call
 
+-   2020-06-07: https://github.com/sequelize/sequelize/issues/9653
+    Changed to db.sync({alter : true}) , check in category.js how indexes should be created in order
+	to not get the duplicate error.
 -   db.sync({alter : true}) created duplicate key at each nodemon restart
 -   Changed to db.sync(), please use mock-data.sql script in teams to import schema and mock data
+
 
 *   12/01/2020 :
 
