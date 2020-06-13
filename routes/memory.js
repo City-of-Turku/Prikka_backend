@@ -10,6 +10,7 @@ const passport = require('passport');
 const sequelize = require('../config/db').sequelize;
 const multer = require('multer');
 const fs = require('fs');
+var _ = require('lodash');
 
 // logger
 const logger = require('../config/winston');
@@ -41,23 +42,27 @@ const upload = multer({
  */
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
+//        attributes: ['*', sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],
+//        attributes: ['id', [sequelize.literal('(SELECT COUNT(*) FROM reports WHERE reports.id = "Memory"."id")'), 'requestsCount']],
+
 //        attributes: [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']],
 //        group : ['id'],
 //        raw: true,
+        include: [
+            {
+                model: User,
+                attributes: ['displayName']
+            },
+            {
+                model: Report,
+                required: false,
+                attributes: ['id']
+            }
+        ],
+//        group: 'Memory.id',
+//        having: sequelize.where(sequelize.fn('COUNT', sequelize.col('Report.memoryId')), '<', 2),
         order: [['id', 'ASC']],
     };
-
-    filters.include = [
-        {
-            model: User,
-            attributes: ['displayName']
-        }, 
-        {
-            model: Report,
-            required: false,
-            attributes: ['id']
-        }
-    ];
 
     filters.distinct = true;
 
@@ -187,26 +192,48 @@ memoryRouter.get('/memories/:id', function(req, res) {
 /**
  * API (PUT) : updateMemoryById
  */
-memoryRouter.put('/memories/:id', secured(), function(req, res) {
+memoryRouter.put('/memories/:id', upload.single("file"), secured(), function(req, res) {
     let memoryId = req.params.id;
-    let user = req.user;
-    Memory.findOne({
+    let updatedMemory = _.pick(req.body, [ 'title', 'categoryId', 'description', 'position', 'photographer', 'whenIsPhotoTaken', 'whereIsPhotoTaken' ]);
+    let userId = req.user.id;
+    const file = req.file;
+    const position = JSON.parse(updatedMemory['position']);
+    updatedMemory['position'] = position;
+    updatedMemory['userId'] = userId;
+    updatedMemory['photo'] = file;
+    if (_.isEmpty(updatedMemory)) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+            message: 'Bad request' // empty body!
+        });
+    }
+    Memory.update(updatedMemory, {
         where: {
             id: memoryId,
-            userId: user.id
+            userId: userId
         },
+        fields: [ 'title', 'categoryId', 'description', 'position', 'photo', 'photographer', 'whenIsPhotoTaken', 'whereIsPhotoTaken' ]
     })
-        .then(memory => {
-            logger.info(`Updated memory, used: ${user.id} ${req.originalUrl} - ${req.method} - ${req.ip}`)
-            let memoryBody = req.body;
-            memory.update(memoryBody);
-            res.send(memory);
+        .then((result) => {
+            if (result[0]) {
+                logger.info(`User ${req.user.id} updated memory ${memoryId}`);
+                res.status(HttpStatus.OK).json({
+                    message: 'Memory updated',
+                    memory: updatedMemory
+                });
+            } else {
+                res.status(HttpStatus.NOT_FOUND).json({
+                    message: 'No changes were made'
+                });
+            }
         })
-        .catch(function(err) {
-            logger.error(err)
-            res.status(HttpStatus.NOT_FOUND).send(`Memory not found.`);
+        .catch((err) => {
+            logger.error(err);
+            res.status(HttpStatus.BAD_REQUEST).json({
+                message: 'Bad request'
+            });
         });
 });
+
 
 /**
  * API (DELETE) : deleteMemoryById
