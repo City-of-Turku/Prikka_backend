@@ -4,6 +4,7 @@ const User = require('../models/user');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
 const Category = require('../models/category');
+const Campaign = require('../models/campaign');
 const HttpStatus = require('http-status-codes');
 const passport = require('passport');
 var _ = require('lodash');
@@ -290,9 +291,10 @@ adminRouter.delete('/auth-management/reports/:id', function(req, res) {
 });
 
 
-/* 
-    CATEGORIES - CREATE/UPDATE/DELETE MEMORY CATEGORIES
-*/
+/*******************************************************************************
+*    CATEGORIES - CREATE/UPDATE/DELETE MEMORY CATEGORIES                       *
+********************************************************************************/
+
 adminRouter.post('/category-management/categories', function(req, res) {
 	if (_.isEmpty(req.body)) {
 		logger.info(`User ${req.user.id} tried creating an empty category`);
@@ -382,6 +384,98 @@ adminRouter.delete('/category-management/categories/:id', function(req, res) {
 				res.status(HttpStatus.OK).send(`Deleted category ${categoryId}`);
 			} else {
 				res.status(HttpStatus.NOT_FOUND).send(`No such category`);
+			}
+		})
+		.catch((err) => {
+			logger.error(err);
+			res.status(HttpStatus.BAD_REQUEST).json({
+				message: 'Bad request'
+			});
+		});
+});
+
+
+
+/********************************************************************************
+ *    CAMPAIGNS - CREATE/UPDATE/DELETE MEMORY CAMPAIGNS                         *
+ ********************************************************************************/
+
+adminRouter.post('/campaign-management/campaigns', function(req, res) {
+	if (_.isEmpty(req.body)) {
+		logger.info(`User ${req.user.id} tried creating an empty campaign`);
+		res.status(HttpStatus.BAD_REQUEST).json({
+			message: 'Bad request'
+		});
+	}
+	let campaignBody = req.body;
+	campaignBody['userId'] = req.user.id;
+	Campaign.create(campaignBody)
+		.then((newCampaign) => {
+			logger.info(`User ${req.user.id} created new campaign ${JSON.stringify(newCampaign)}`);
+			res.status(HttpStatus.CREATED).json({
+				message: 'Campaign created',
+				campaign: newCampaign
+			});
+		})
+		.catch((err) => {
+			logger.error(err);
+			console.log('Campaign creation was unsuccessfull',err);
+			res.status(HttpStatus.BAD_REQUEST).json({
+				message: 'Bad request'
+			});
+		});
+});
+
+adminRouter.put('/campaign-management/campaigns/:id', function(req, res) {
+	let campaignId = req.params.id;
+	let updatedCampaign = _.pick(req.body, [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN' ]);
+	if (_.isEmpty(updatedCampaign)) {
+		res.status(HttpStatus.BAD_REQUEST).json({
+			message: 'Bad request' // empty body!
+		});
+	}
+	logger.info(`User ${req.user.id} tries to update campaign ${campaignId}`);
+	Campaign.update(updatedCampaign, {
+		where: {
+			id: campaignId
+		},
+		fields: [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN' ]
+	})
+		.then((result) => {
+			if (result[0]) {
+				logger.info(`User ${req.user.id} updated campaign ${campaignId}`);
+				res.status(HttpStatus.OK).json({
+					message: 'Campaign updated',
+					campaign: updatedCampaign
+				});
+			} else {
+				res.status(HttpStatus.NOT_FOUND).json({
+					message: 'No changes were made'
+				});
+			}
+		})
+		.catch((err) => {
+			logger.error(err);
+			res.status(HttpStatus.BAD_REQUEST).json({
+				message: 'Bad request'
+			});
+		});
+});
+
+adminRouter.delete('/campaign-management/campaigns/:id', function(req, res) {
+	let campaignId = req.params.id;
+	logger.info(`User ${req.user.id} try to delete campaign ${campaignId}`);
+	Campaign.destroy({
+		where: {
+			id: campaignId
+		}
+	})
+		.then((result) => {
+			if (result) {
+				logger.info(`User ${req.user.id} deleted campaign ${campaignId}`);
+				res.status(HttpStatus.OK).send(`Deleted campaign ${campaignId}`);
+			} else {
+				res.status(HttpStatus.NOT_FOUND).send(`No such campaign`);
 			}
 		})
 		.catch((err) => {

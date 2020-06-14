@@ -38,6 +38,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const memoryRouter = require('./routes/memory');
 const categoryRouter = require('./routes/category');
+const campaignRouter = require('./routes/campaign');
 const adminRouter = require('./routes/admin');
 
 /* ---------------------
@@ -127,6 +128,7 @@ app.use('/api/memory-management', memoryRouter);
 app.use('/api/admin/', [secured(), verifyAdmin], adminRouter);
 app.use('/api/user-management', secured(), usersRouter);
 app.use('/api/category-management', categoryRouter);
+app.use('/api/campaign-management', campaignRouter);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
     next(createError(HttpStatus.NOT_FOUND, 'Not found'));
