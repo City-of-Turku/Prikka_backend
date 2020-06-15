@@ -1,7 +1,7 @@
 const express = require('express');
 const Memory = require('../models/memory');
 const Report = require('../models/report');
-const User = require('../models/user')
+const User = require('../models/user');
 const Category = require('../models/category');
 const HttpStatus = require('http-status-codes');
 const memoryRouter = express.Router();
@@ -15,7 +15,7 @@ var _ = require('lodash');
 // logger
 const logger = require('../config/winston');
 
-const secured = require('../middleware/secured')
+const secured = require('../middleware/secured');
 
 const upload = multer({
 //    dest: process.env.IMAGE_UPLOAD_PATH,
@@ -30,7 +30,7 @@ const upload = multer({
         }
     },
     limits: { fileSize:  10 * 1024 * 1024 }
-})
+});
 
 /**
  * API (GET) : getAllMemories
@@ -42,12 +42,20 @@ const upload = multer({
  */
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
+//        attributes: ['id', [sequelize.fn('COUNT', sequelize.col('Report.Id')), 'reportAmount']],
+        //attributes: ['Report.Id', [sequelize.fn('count', sequelize.col('id')), 'noOfReports']],
+//        attributes: ['Memory.*', 'Report.*', [sequelize.fn('COUNT', sequelize.col('Report.memoryId'))], 'ReportCount'],
 //        attributes: ['*', sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],
 //        attributes: ['id', [sequelize.literal('(SELECT COUNT(*) FROM reports WHERE reports.id = "Memory"."id")'), 'requestsCount']],
 
 //        attributes: [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']],
 //        group : ['id'],
 //        raw: true,
+        // User.findAll({
+        //   attributes: ['User.*', 'Post.*', [sequelize.fn('COUNT', sequelize.col('Post.id')), 'PostCount']],
+        //   include: [Post]
+        // }
+//        attributes: ['Memory.*'],
         include: [
             {
                 model: User,
@@ -59,32 +67,40 @@ memoryRouter.get('/memories', function(req, res) {
                 attributes: ['id']
             }
         ],
+//        group: ['Report.Id'],
+//        raw: true,
+
 //        group: 'Memory.id',
 //        having: sequelize.where(sequelize.fn('COUNT', sequelize.col('Report.memoryId')), '<', 2),
+//        where:  sequelize.where(sequelize.fn('COUNT', sequelize.col('Report.id')), '<', 2),
+        //where:  (sequelize.fn('COUNT', sequelize.col('Report.id')), '<', 2),
         order: [['id', 'ASC']],
     };
 
-    filters.distinct = true;
+//    filters.distinct = true;
 
 
     //Obtain GET request parameters
-    //filter by category
-    let categoriesParam = req.query.categoryId;
-    if (categoriesParam) {
-        let categoryIdList = categoriesParam.split(',');
-        filters.where = { categoryId: { [Op.or]: categoryIdList } };
-//    TODO repostedMemories
-//    } else {
-//        filters.where = { categoryId: { [Op.or]: categoryIdList } };
-    }
 
     //filter by category
+    let categoryId = req.query.categoryId;
+    if (categoryId) {
+        filters.where = {
+            categoryId: req.query.categoryId
+        };
+    }
+
+    // filter by page
     let page = req.query.page;
     if (page) {
+        // Page=1 fetches memories 11-20.
+        page = page-1;
         let maxPerRequest = 10;
         filters.offset = page * maxPerRequest;
         filters.limit = maxPerRequest;
     }
+    logger.info("page="+page);
+    logger.info("categoryId="+categoryId);
 
     logger.info(filters);
     Memory.findAndCountAll(filters)
@@ -137,16 +153,16 @@ memoryRouter.post('/memories', upload.single("file"), function(req, res) {
     // isPostman variable is undefined normally
     if (isPostman != "true") {
         const position = JSON.parse(memoryBody['position']);
-        console.log(req.body)
+        console.log(req.body);
         memoryBody['position'] = position;
         memoryBody['userId'] = userId;
         memoryBody['photo'] = file;
     }
 
-    console.log(memoryBody)
+    console.log(memoryBody);
     Memory.create(memoryBody)
         .then(memory => {
-            console.log(memory)
+            console.log(memory);
             res.status(HttpStatus.CREATED).send(memory);
         })
         .catch(err => {
@@ -184,7 +200,7 @@ memoryRouter.get('/memories/:id', function(req, res) {
             res.status(HttpStatus.OK).send(memory);
         })
         .catch(function(err) {
-            logger.error(err)
+            logger.error(err);
             res.status(HttpStatus.NOT_FOUND).send(err);
         });
 });
@@ -250,7 +266,7 @@ memoryRouter.delete('/memories/:id', secured(), function(req, res) {
         .then(result => {
             // result changes between 0 and 1 if memory is found
             if (result) {
-                logger.info(`User ${userId} deleted memory ${memoryId}`)
+                logger.info(`User ${userId} deleted memory ${memoryId}`);
                 // deleted memory
                 res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
             } else {
@@ -312,7 +328,7 @@ memoryRouter.post('/reports', secured(), function(req, res) {
                 });
         })
         .catch(function(err) {
-            logger.error(`Memory not found: ${err}`)
+            logger.error(`Memory not found: ${err}`);
             res.status(HttpStatus.BAD_REQUEST).send(err);
         })
 });
@@ -369,7 +385,7 @@ memoryRouter.get('/reports/:id', function(req, res) {
             }
         })
         .catch(function(err) {
-            logger.error(err)
+            logger.error(err);
             res.send(err);
         });
 });
@@ -397,7 +413,7 @@ memoryRouter.get('/reportedDistinct', function(req, res) {
             }
         })
         .catch(function(err) {
-            logger.error(err)
+            logger.error(err);
             res.send(err);
         });
 });
@@ -426,7 +442,7 @@ memoryRouter.get('/reportedMemories', function(req, res) {
     filters.distinct = true;
     filters.where = {
         archiveDate: null
-    }
+    };
 
     //Obtain GET request parameters
     //filter by category

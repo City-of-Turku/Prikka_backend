@@ -20,7 +20,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db').sequelize;
 const Report = require('./report');
-const User = require('./user')
+const User = require('./user');
 
 const Memory = sequelize.define(
     'Memory',
@@ -86,6 +86,15 @@ const Memory = sequelize.define(
 //                return this.getValue('id')
 //            }
 //        },
+//        noOfReports: {
+//            type: DataTypes.VIRTUAL(sequelize.fn((`reports`.id))),
+//            type: [sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],
+//            type: sequelize.VIRTUAL,
+//            get() {
+//                return this.getName('memoryId');
+//            }
+//        },
+
     },
     {
         timestamps: true,
