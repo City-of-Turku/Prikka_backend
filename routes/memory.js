@@ -430,6 +430,7 @@ memoryRouter.get('/reportedMemories', function(req, res) {
     filters.include = [
         {
             model: User,
+            required: false,
             attributes: ['userName', 'displayName']
         },
         {
@@ -446,24 +447,24 @@ memoryRouter.get('/reportedMemories', function(req, res) {
 
     //Obtain GET request parameters
     //filter by category
-    let categoriesParam = req.query.categoryId;
-    if (categoriesParam) {
-        let categoryIdList = categoriesParam.split(',');
-        filters.where = { categoryId: { [Op.or]: categoryIdList } };
-    }
+//    let categoriesParam = req.query.categoryId;
+//    if (categoriesParam) {
+//        let categoryIdList = categoriesParam.split(',');
+//        filters.where = { categoryId: { [Op.or]: categoryIdList } };
+//    }
 
     //filter by category
-    let page = req.query.page;
-    if (page) {
-        let maxPerRequest = 10;
-        filters.offset = page * maxPerRequest;
-        filters.limit = maxPerRequest;
-    }
+//    let page = req.query.page;
+//    if (page) {
+//        let maxPerRequest = 10;
+//        filters.offset = page * maxPerRequest;
+//        filters.limit = maxPerRequest;
+//    }
 
     logger.info(filters);
     Memory.findAndCountAll(filters)
         .then(memories => {
-            logger.info(`sending memories to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+            logger.info(`sending ${memories.count} reported memories to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
             if (memories.count != 0) {
                 res.status(HttpStatus.OK).send(memories);
             } else {
