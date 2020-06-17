@@ -14,11 +14,39 @@ const sequelize = require('../config/db').sequelize;
 const Category = sequelize.define(
     'Category',
     {
-        name: {
+        nameFI: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        description: {
+        descriptionFI: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+            validate: {
+                min: {
+                    args: 10,
+                    msg: 'Description has to be minimum 10 characters',
+                },
+            },
+        },
+        nameSV: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        descriptionSV: {
+            type: DataTypes.TEXT,
+            allowNull: false,
+            validate: {
+                min: {
+                    args: 10,
+                    msg: 'Description has to be minimum 10 characters',
+                },
+            },
+        },
+        nameEN: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        descriptionEN: {
             type: DataTypes.TEXT,
             allowNull: false,
             validate: {
@@ -30,7 +58,7 @@ const Category = sequelize.define(
         },
     },
     { indexes: [
-            {unique:true, fields:['name']}
+            {unique:true, fields:['nameFI', 'nameSV','nameEN']}
         ]
     },
     {

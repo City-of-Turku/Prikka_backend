@@ -19,6 +19,12 @@ INSERT INTO `Categories` (`id`, `name`, `createdAt`, `description`) VALUES
 	(2, 'Culture', '2020-03-09 15:35:34', ''),
 	(3, 'Sport', '2020-03-09 15:35:37', ''),
 	(4, 'Nature', '2020-03-09 15:35:40', '');
+
+INSERT INTO `Categories` (`id`, `createdAt`, `updatedAt`, `nameFI`, `descriptionFI`, `nameSV`, `descriptionSV`, `nameEN`, `descriptionEN`) VALUES
+    (1, '2020-03-04 15:35:33', '2020-03-04 15:35:33', 'Koulu', '', 'Skola', '', 'School',''),
+    (2, '2020-03-09 15:35:34', '2020-03-04 15:35:34', 'Kultuuri', '','Kultur', '', 'Culture', ''),
+    (3, '2020-03-09 15:35:37', '2020-03-04 15:35:37', 'Urheilu', '', 'Idrott', '', 'Sport', ''),
+    (4, '2020-03-09 15:35:40', '2020-03-04 15:35:40', 'Luonto', '', 'Natur', '', 'Nature', '');
 /*!40000 ALTER TABLE `Categories` ENABLE KEYS */;
 
 -- Listage des données de la table myturkuMemories_db.Memories : ~15 rows (environ)
