@@ -42,7 +42,8 @@ const upload = multer({
  */
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
-//        attributes: ['id', [sequelize.fn('COUNT', sequelize.col('Report.Id')), 'reportAmount']],
+//        attributes: ['Memory.*'],
+//        attributes: [[sequelize.fn('COUNT', sequelize.col('Reports.id')), 'reportAmount']],
         //attributes: ['Report.Id', [sequelize.fn('count', sequelize.col('id')), 'noOfReports']],
 //        attributes: ['Memory.*', 'Report.*', [sequelize.fn('COUNT', sequelize.col('Report.memoryId'))], 'ReportCount'],
 //        attributes: ['*', sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],

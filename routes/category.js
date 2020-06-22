@@ -12,7 +12,7 @@ const categoryRouter = express.Router();
  */
 categoryRouter.get('/categories', function(req, res) {
     Category.findAll({
-        attributes: ['name', 'description', 'id'],
+        attributes: ['nameFI', 'nameSV', 'nameEN', 'descriptionFI', 'id'],
     })
         .then(categories => {
             logger.info(`List of categories sent - ${req.originalUrl} - ${req.method} - ${req.ip}`)
