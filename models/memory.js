@@ -58,11 +58,11 @@ const Memory = sequelize.define(
         },
         whenIsPhotoTaken: {
             type: DataTypes.STRING,
-                allowNull: true,
+            allowNull: true,
         },
         whereIsPhotoTaken: {
             type: DataTypes.STRING,
-                allowNull: true,
+            allowNull: true,
         },
         position: {
             type: DataTypes.GEOMETRY('POINT'),
@@ -79,22 +79,9 @@ const Memory = sequelize.define(
             type: DataTypes.DATE,
             allowNull: true,
         },
-//      TODO reportedMemories
-//        noOfReports: {
-//            type: DataTypes.VIRTUAL,
-//            get() {
-//                return this.getValue('id')
-//            }
-//        },
-//        noOfReports: {
-//            type: DataTypes.VIRTUAL(sequelize.fn((`reports`.id))),
-//            type: [sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],
-//            type: sequelize.VIRTUAL,
-//            get() {
-//                return this.getName('memoryId');
-//            }
-//        },
-
+        activeReports: {
+            type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
+        }
     },
     {
         timestamps: true,

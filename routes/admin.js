@@ -223,9 +223,10 @@ adminRouter.get('/memory-management/reports/:id', function(req, res) {
 		});
 });
 
-/*
-    REPORTS - UPDATE MEMORY REPORT
-*/
+
+/********************************************************************************
+ *    REPORTS - UPDATE/DELETE MEMORY REPORTS                                    *
+ ********************************************************************************/
 
 adminRouter.put('/auth-management/reports/:id', function(req, res) {
 	let reportId = req.params.id;
@@ -238,35 +239,79 @@ adminRouter.put('/auth-management/reports/:id', function(req, res) {
 	}
 	logger.info(`User ${req.user.id} tries to update report ${reportId}, invalid: ${updatedReport.invalid}`);
 
+	// Update report from valid('0') to invalid('1') or invalid('1') to valid ('0')
 	Report.update(updatedReport,{
 		where: {
 			id: reportId
 		},
 		fields: [ 'invalid', 'adminUserId']
 	})
-		.then((result) => {
-			if (result[0]) {
-				logger.info(`User ${req.user.id} updated report with id ${reportId}, invalid: ${updatedReport.invalid}`);
-				res.status(HttpStatus.OK).json({
-					message: 'Report created',
-					category: updatedReport
-				});
-			} else {
-				res.status(HttpStatus.NOT_FOUND).send(`No such report`);
-			}
-		})
-		.catch((err) => {
-			logger.error(err);
-			res.status(HttpStatus.BAD_REQUEST).json({
-				message: 'Bad request'
-			});
+	.then((result) => {
+		if (result[0]) {
+			logger.info(`User ${req.user.id} updated report with id ${reportId}, invalid: ${updatedReport.invalid}`);
+
+			// The report was updated, now we still need to update activeReports for memory
+			// Start by fetching the report in order to get the memoryId
+			Report.findByPk(reportId, {
+				attributes: ['memoryId']},
+			)
+			.then(report => {
+				if (report!=null) {
+
+					// Then fetch the memory in order to get the activeReports content
+					Memory.findByPk(report.memoryId)
+					.then(memory => {
+						if (memory!=null){
+							let activeRep = memory.activeReports-1;
+							if (updatedReport.invalid){
+								activeRep = memory.activeReports+1;
+							}
+
+							// Finally update the activeReports column
+							Memory.update(
+								{
+									'activeReports': activeRep},
+								{
+								where: {
+									id: memory.id
+								}})
+								.then(memoryUpdate => {
+									if (memoryUpdate) {
+										// Update of activeReport for memory was successful
+									} else {
+										// Update of activeReport for memory was unsuccessful
+										// TODO What to do?
+									}
+								})
+								.catch((err) => {
+									logger.error(err);
+									res.status(HttpStatus.BAD_REQUEST).json({
+										message: 'Memory activeReport update was unsuccessful'
+									});
+								});
+							res.status(HttpStatus.OK).json({
+								message: 'Report updated',
+								category: updatedReport
+							});
+
+						}
+					});
+				}
+			})
+
+		} else {
+			res.status(HttpStatus.NOT_FOUND).send(`No such report`);
+		}
+	})
+	.catch((err) => {
+		logger.error(err);
+		res.status(HttpStatus.BAD_REQUEST).json({
+			message: 'Bad request'
 		});
+	});
 });
 
-/* 
-    REPORTS - DELETE MEMORY REPORTS
-*/
-
+// TODO Not in use?
 adminRouter.delete('/auth-management/reports/:id', function(req, res) {
 	let reportId = req.params.id;
 	Report.destroy({

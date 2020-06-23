@@ -42,52 +42,39 @@ const upload = multer({
  */
 memoryRouter.get('/memories', function(req, res) {
     let filters = {
-//        attributes: ['Memory.*'],
-//        attributes: [[sequelize.fn('COUNT', sequelize.col('Reports.id')), 'reportAmount']],
-        //attributes: ['Report.Id', [sequelize.fn('count', sequelize.col('id')), 'noOfReports']],
-//        attributes: ['Memory.*', 'Report.*', [sequelize.fn('COUNT', sequelize.col('Report.memoryId'))], 'ReportCount'],
-//        attributes: ['*', sequelize.fn('COUNT', sequelize.col('Report.memoryId'))],
-//        attributes: ['id', [sequelize.literal('(SELECT COUNT(*) FROM reports WHERE reports.id = "Memory"."id")'), 'requestsCount']],
-
-//        attributes: [[sequelize.fn('COUNT', 'Report.id'), 'reportsCount']],
-//        group : ['id'],
-//        raw: true,
-        // User.findAll({
-        //   attributes: ['User.*', 'Post.*', [sequelize.fn('COUNT', sequelize.col('Post.id')), 'PostCount']],
-        //   include: [Post]
-        // }
-//        attributes: ['Memory.*'],
         include: [
             {
                 model: User,
                 attributes: ['displayName']
             },
+            // TODO Is Report needed?
             {
                 model: Report,
                 required: false,
                 attributes: ['id']
             }
         ],
-//        group: ['Report.Id'],
-//        raw: true,
-
-//        group: 'Memory.id',
-//        having: sequelize.where(sequelize.fn('COUNT', sequelize.col('Report.memoryId')), '<', 2),
-//        where:  sequelize.where(sequelize.fn('COUNT', sequelize.col('Report.id')), '<', 2),
-        //where:  (sequelize.fn('COUNT', sequelize.col('Report.id')), '<', 2),
+        where: {
+            activeReports: {
+                [Op.or]: {
+                    [Op.is]: null,
+                    [Op.lt]: 2
+                }}},
         order: [['id', 'ASC']],
     };
 
-//    filters.distinct = true;
+    // filters.distinct = true;
 
-
-    //Obtain GET request parameters
-
-    //filter by category
+    // filter by category
     let categoryId = req.query.categoryId;
     if (categoryId) {
         filters.where = {
-            categoryId: req.query.categoryId
+                categoryId: req.query.categoryId,
+                activeReports: {
+                    [Op.or]: {
+                        [Op.is]: null,
+                        [Op.lt]: 2
+                    }},
         };
     }
 
@@ -289,49 +276,75 @@ memoryRouter.post('/reports', secured(), function(req, res) {
     let user = req.user;
     let reportBody = req.body;
     reportBody.userId = user.id;
+    reportBody.invalid = false;
+
+    // Check if memory exits
     Memory.findOne({
+        attributes: ['id', 'activeReports'],
         where: {
             id: reportBody.memoryId
         },
     })
-        .then(memory => {
-            logger.info('MEMORY FOUND');
-            Report.findOne({
-                where: {
-                    memoryId: reportBody.memoryId,
-                    userId: reportBody.userId,
-                },
-            })
-                .then(report => {
-                    if (report == null) {
-                        // If existing report on memory is not found, new report is created.
-                        Report.create(reportBody)
-                            .then(report => {
-                                logger.info(`user ${user.id} reported memory ${reportBody.memoryId}`)
+    .then(memory => {
+        // Memory found, check if same user already has reported this memory
+        // We also need to check if the previous report was invalidated by admin
+        Report.findOne({
+            where: {
+                memoryId: reportBody.memoryId,
+                userId: reportBody.userId,
+                invalid: false
+            },
+        })
+        .then(report => {
+            if (report == null) {
+                // There does not exits an active report for this memory by the user.
+                Report.create(reportBody)
+                    .then(report => {
+                        // Created a new report, we still need to update activeReports for memory
+                        logger.info(`User ${user.id} reported memory ${reportBody.memoryId}`);
+                        let activeRep = memory.activeReports+1;
+                        Memory.update(
+                            {
+                                'activeReports': activeRep},
+                            {
+                            where: {
+                                id: memory.id
+                            }})
+                            .then(memoryUpdate => {
+                                if (memoryUpdate[0]){
+                                    // Update of activeReport for memory was successful
+                                } else {
+                                    // Update of activeReport for memory was unsuccessful
+                                    // TODO What to do?
+                                }
                                 res.status(HttpStatus.CREATED).send(report);
                             })
                             .catch(function(err) {
                                 logger.error(err);
-                                res.status(HttpStatus.BAD_REQUEST).json({
-                                    message: 'Error creating report'
-                                });
-                                throw 'Error creating report.';
+                                res.status(HttpStatus.BAD_REQUEST).send(err);
                             });
-                    } else {
-                        // If existing report on memory is found.
-                        res;
-                        throw 'Memory already reported by user.';
-                    }
-                })
-                .catch(function(err) {
-                    logger.error(err);
-                    res.status(HttpStatus.BAD_REQUEST).send(err);
-                });
+                    })
+                    .catch(function(err) {
+                        logger.error(err);
+                        res.status(HttpStatus.BAD_REQUEST).json({
+                            message: 'Error creating report'
+                        });
+                        throw 'Error creating report.';
+                    });
+            } else {
+                // There already exists an active report for this memory by the user.
+                res.status(HttpStatus.OK).send('Memory already reported by user.');
+            }
         })
         .catch(function(err) {
-            logger.error(`Memory not found: ${err}`);
+            logger.error(err);
             res.status(HttpStatus.BAD_REQUEST).send(err);
-        })
+        });
+    })
+    .catch(function(err) {
+        logger.error(`Memory not found: ${err}`);
+        res.status(HttpStatus.BAD_REQUEST).send(err);
+    })
 });
 
 
