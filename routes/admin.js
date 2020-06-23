@@ -330,18 +330,19 @@ adminRouter.post('/category-management/categories', function(req, res) {
 
 adminRouter.put('/category-management/categories/:id', function(req, res) {
 	let categoryId = req.params.id;
-	let updatedCategory = _.pick(req.body, [ 'name', 'description' ]);
+	// let updatedCategory = _.pick(req.body, [ 'name', 'description' ]);
+	let updatedCategory = _.pick(req.body, [ 'nameFI', 'descriptionFI', 'nameSV', 'nameEN' ]);
 	if (_.isEmpty(updatedCategory)) {
 		res.status(HttpStatus.BAD_REQUEST).json({
 			message: 'Bad request' // empty body, boo!
 		});
 	}
-	logger.info(`User ${req.user.id} tries to update category ${categoryId}, updated category name: ${updatedCategory.name} and category description: ${updatedCategory.description}`);
+	logger.info(`User ${req.user.id} tries to update category ${categoryId}, updated category name: ${updatedCategory.nameFI} and category description: ${updatedCategory.descriptionFI}`);
 	Category.update(updatedCategory, {
 		where: {
 			id: categoryId
 		},
-		fields: [ 'name', 'description' ]
+		fields: [ 'nameFI', 'descriptionFI', 'nameSV', 'nameEN' ]
 	})
 		.then((result) => {
 			if (result[0]) {
