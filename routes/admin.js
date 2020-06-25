@@ -446,6 +446,28 @@ adminRouter.delete('/category-management/categories/:id', function(req, res) {
  *    CAMPAIGNS - CREATE/UPDATE/DELETE MEMORY CAMPAIGNS                         *
  ********************************************************************************/
 
+adminRouter.get('/campaign-management/campaigns', function(req, res) {
+	Campaign.findAndCountAll({
+		// include: [ {
+		// 	model: User,
+		// 	attributes: ['displayName']
+		// }],
+		attributes: ['id', 'titleEN', 'titleFI', 'titleSV', 'descriptionEN', 'descriptionFI', 'descriptionSV',
+			'createdAt', 'categoryId', 'isPublic'],
+		order: [['createdAt', 'DESC']],
+	})
+		.then(campaigns => {
+			logger.info(`List of campaigns sent - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+			res.status(HttpStatus.OK).send(campaigns);
+		})
+		.catch(err => {
+			logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+			res.status(HttpStatus.BAD_REQUEST).json({
+				message: 'Bad request',
+			});
+		});
+});
+
 adminRouter.post('/campaign-management/campaigns', function(req, res) {
 	if (_.isEmpty(req.body)) {
 		logger.info(`User ${req.user.id} tried creating an empty campaign`);
@@ -474,7 +496,8 @@ adminRouter.post('/campaign-management/campaigns', function(req, res) {
 
 adminRouter.put('/campaign-management/campaigns/:id', function(req, res) {
 	let campaignId = req.params.id;
-	let updatedCampaign = _.pick(req.body, [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN' ]);
+	let updatedCampaign = _.pick(req.body,
+		[ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId', 'isPublic' ]);
 	if (_.isEmpty(updatedCampaign)) {
 		res.status(HttpStatus.BAD_REQUEST).json({
 			message: 'Bad request' // empty body!
@@ -485,7 +508,7 @@ adminRouter.put('/campaign-management/campaigns/:id', function(req, res) {
 		where: {
 			id: campaignId
 		},
-		fields: [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN' ]
+		fields: [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId', 'isPublic' ]
 	})
 		.then((result) => {
 			if (result[0]) {

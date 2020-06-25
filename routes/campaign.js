@@ -12,7 +12,9 @@ const campaignRouter = express.Router();
  */
 campaignRouter.get('/campaigns', function(req, res) {
     Campaign.findAndCountAll({
-        attributes: ['id', 'titleEN', 'titleFI', 'titleSV', 'descriptionEN', 'descriptionFI', 'descriptionSV'],
+        attributes: ['id', 'titleEN', 'titleFI', 'titleSV', 'descriptionEN', 'descriptionFI', 'descriptionSV',
+            'categoryId', 'createdAt'],
+        where: { isPublic: true },
         order: [['createdAt', 'DESC']],
     })
         .then(campaigns => {
@@ -34,6 +36,7 @@ campaignRouter.get('/campaigns/:id', function(req, res) {
     User.findByPk(userId, {
         where: {
             id: req.params.id,
+            isPublic: true,
         },
     })
         .then(campaign => {

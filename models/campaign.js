@@ -57,6 +57,14 @@ const Campaign = sequelize.define(
                 },
             },
         },
+        categoryId: {
+            type: DataTypes.SMALLINT,
+            allowNull: true,
+        },
+        isPublic: {
+            type: DataTypes.BOOLEAN,
+            default: false,
+        }
     },
     {
         timestamps: true,
