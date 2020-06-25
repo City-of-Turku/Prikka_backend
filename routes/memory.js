@@ -60,7 +60,7 @@ memoryRouter.get('/memories', function(req, res) {
                     [Op.is]: null,
                     [Op.lt]: 2
                 }}},
-        order: [['id', 'ASC']],
+        order: [['id', 'DESC']],
     };
 
     // filters.distinct = true;
@@ -354,7 +354,7 @@ memoryRouter.post('/reports', secured(), function(req, res) {
 memoryRouter.get('/mymemories', function(req, res) {
     let user = req.user;
     let filters = {
-        order: [['createdAt', 'DESC']],
+        order: [['id', 'DESC']],
     };
 
     filters.include = [
