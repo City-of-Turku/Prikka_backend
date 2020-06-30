@@ -24,6 +24,7 @@ module.exports = passport => {
                 // accessToken is the token to call Auth0 API (not needed in the most cases)
                 // extraParams.id_token has the JSON Web Token
                 // profile has all the information from the user
+                logger.info(profile);
                 User.findOrCreate({
                     where: {
                         id: profile.id,
@@ -31,7 +32,7 @@ module.exports = passport => {
                     defaults: {
                         id: profile.id,
                         userName: profile.name,
-                        displayName: profile.nickname,
+                        displayName: profile.displayName,
                         email: profile.emails[0].value,
                         admin: false,
                         provider: profile.provider,

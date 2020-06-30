@@ -30,9 +30,13 @@ const User = sequelize.define(
             allowNull: false,
             primaryKey: true
         },
-        userName: {
+        username: {
             type: DataTypes.STRING,
             allowNull: true,
+            unique: {
+                args: true,
+                msg: 'This username is taken',
+            },
         },
         email: {
             type: DataTypes.STRING,
