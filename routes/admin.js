@@ -262,9 +262,9 @@ adminRouter.put('/auth-management/reports/:id', function(req, res) {
 					Memory.findByPk(report.memoryId)
 					.then(memory => {
 						if (memory!=null){
-							let activeRep = memory.activeReports-1;
+							let activeRep = memory.activeReports+1;
 							if (updatedReport.invalid){
-								activeRep = memory.activeReports+1;
+								activeRep = memory.activeReports-1;
 							}
 
 							// Finally update the activeReports column
