@@ -32,7 +32,7 @@ module.exports = passport => {
                     defaults: {
                         id: profile.id,
                         userName: profile.name,
-                        displayName: profile.displayName,
+                        displayName: profile.nickname,
                         email: profile.emails[0].value,
                         admin: false,
                         provider: profile.provider,
