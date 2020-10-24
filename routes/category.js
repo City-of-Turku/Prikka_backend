@@ -1,8 +1,8 @@
 const express = require('express');
+const Sequelize = require('sequelize');
 const Category = require('../models/category');
+const Memory = require('../models/memory');
 const HttpStatus = require('http-status-codes');
-
-// logger
 const logger = require('../config/winston');
 
 const categoryRouter = express.Router();
@@ -11,18 +11,37 @@ const categoryRouter = express.Router();
  * API (GET) : getAllCategories
  */
 categoryRouter.get('/categories', function(req, res) {
-    Category.findAll({
-        attributes: [ 'id', 'nameFI', 'descriptionFI', 'nameSV','descriptionSV', 'nameEN', 'descriptionEN'],
-    })
+    var query = {
+        attributes: [ 'id', 'nameFI', 'descriptionFI', 'nameSV', 'descriptionSV', 'nameEN', 'descriptionEN',
+            [Sequelize.fn('COUNT',Sequelize.col(`Memories.id`)),'memoryCount']],
+        include:[
+            {
+                model: Memory,
+                required: false,
+                attributes: []
+            }
+        ],
+        group: ['id', 'nameFI', 'descriptionFI', 'nameSV', 'descriptionSV', 'nameEN', 'descriptionEN'],
+        order: [['nameFI', 'ASC']],
+        raw: true,
+        logging: console.log
+    };
+    // This logger does not work for the moment correctly
+    // logger.debug(`fetchAllCategories: query= ${query.toString()}`);
+    Category.findAll(query)
         .then(categories => {
-            logger.info(`List of categories sent - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+            logger.info(`List of categories sent - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+            // TODO Test, remove when everything works ok ----------
+            var categoryTmp = categories[0];
+            logger.debug( `category[0]: id=${categoryTmp.id}, nameFI=${categoryTmp.nameFI}, memoryCount=${categoryTmp.memoryCount}`);
+            // Test end ---------
             res.status(HttpStatus.OK).json({
                 message: 'Found these categories',
                 categories: categories,
             });
         })
         .catch(err => {
-            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
             res.status(HttpStatus.BAD_REQUEST).json({
                 message: 'Bad request',
             });
@@ -46,7 +65,7 @@ categoryRouter.get('/categories/:id', function(req, res) {
             }
         })
         .catch(function(err) {
-            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
             res.send(err);
         });
 });
