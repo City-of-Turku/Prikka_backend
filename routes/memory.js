@@ -244,30 +244,46 @@ memoryRouter.put('/memories/:id', upload.single("file"), secured(), function(req
  */
 memoryRouter.delete('/memories/:id', secured(), function(req, res) {
     let memoryId = req.params.id;
-    let user = req.user;
-    Memory.destroy({
-        where: {
-            id: memoryId,
-            userId: user.id,
-        },
-    })
-        .then(result => {
-            // result changes between 0 and 1 if memory is found
-            if (result) {
-                logger.info(`User ${userId} deleted memory ${memoryId}`);
-                // deleted memory
-                res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
+    let userId = req.user.id;
+
+    // Fetch the memory to be deleted (with the user information, needed?)
+    Memory.findByPk(req.params.id,{
+        include:
+            [
+                {
+                    model: User,
+                    attributes: ['displayName']
+                }
+            ],
+        })
+        .then(memory => {
+            // Check that the req user is the owner of the memory
+            if (memory.userId==userId){
+                Memory.destroy({
+                    where: {
+                        id: memoryId
+                    },
+                })
+                .then(result => {
+                    // result changes between 0 and 1 if memory is found
+                    if (result) {
+                        logger.info(`User ${userId} deleted memory ${memoryId}`);
+                        // deleted memory
+                        res.status(HttpStatus.OK).send(`Deleted memory #${memoryId}`);
+                    }
+                })
+                .catch(err => {
+                    logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+                });
             } else {
                 // memory not found or client is trying to delete someone else's memory
                 // TODO: admin user should never get this
                 res.status(HttpStatus.FORBIDDEN).send(`Forbidden`);
             }
         })
-        .catch(err => {
-            logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
-        });
     }
 );
+
 
 /**
  * API (POST) : createMemoryReport
