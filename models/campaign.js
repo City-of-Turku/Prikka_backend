@@ -64,6 +64,10 @@ const Campaign = sequelize.define(
         isPublic: {
             type: DataTypes.BOOLEAN,
             default: false,
+        },
+        visibleUntilDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
         }
     },
     {

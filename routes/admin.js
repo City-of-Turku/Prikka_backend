@@ -92,7 +92,7 @@ adminRouter.get('/auth-management/user', function(req, res) {
 	logger.info(filters);
 	User.findAndCountAll(filters)
 		.then(users => {
-			logger.info(`sending users to client - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+			logger.info(`sending users to client - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 			if (users.count != 0) {
 				res.status(HttpStatus.OK).send(users);
 			} else {
@@ -211,14 +211,14 @@ adminRouter.get('/memory-management/reports/:id', function(req, res) {
 	})
 		.then(reports => {
 			if (reports.count != 0) {
-				logger.info(`sending list of reports on memory ${req.params.id} to client`)
+				logger.info(`sending list of reports on memory ${req.params.id} to client`);
 				res.status(HttpStatus.OK).send(reports);
 			} else {
 				throw 'No reports on memory.';
 			}
 		})
 		.catch(function(err) {
-			logger.error(err)
+			logger.error(err);
 			res.send(err);
 		});
 });
@@ -328,7 +328,7 @@ adminRouter.delete('/auth-management/reports/:id', function(req, res) {
 			}
 		})
 		.catch((err) => {
-			logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`)
+			logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 			res.status(HttpStatus.BAD_REQUEST).json({
 				message: 'Bad request'
 			});
@@ -366,7 +366,7 @@ adminRouter.post('/category-management/categories', function(req, res) {
 		})
 		.catch((err) => {
 			logger.error(err);
-			console.log('aasadasdasdd',err)
+			console.log('aasadasdasdd',err);
 			res.status(HttpStatus.BAD_REQUEST).json({
 				message: 'Bad request'
 			});
@@ -453,7 +453,7 @@ adminRouter.get('/campaign-management/campaigns', function(req, res) {
 		// 	attributes: ['displayName']
 		// }],
 		attributes: ['id', 'titleEN', 'titleFI', 'titleSV', 'descriptionEN', 'descriptionFI', 'descriptionSV',
-			'createdAt', 'categoryId', 'isPublic'],
+			'createdAt', 'categoryId', 'isPublic', 'visibleUntilDate'],
 		order: [['createdAt', 'DESC']],
 	})
 		.then(campaigns => {
@@ -497,7 +497,8 @@ adminRouter.post('/campaign-management/campaigns', function(req, res) {
 adminRouter.put('/campaign-management/campaigns/:id', function(req, res) {
 	let campaignId = req.params.id;
 	let updatedCampaign = _.pick(req.body,
-		[ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId', 'isPublic' ]);
+		[ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId',
+			'isPublic', 'visibleUntilDate' ]);
 	if (_.isEmpty(updatedCampaign)) {
 		res.status(HttpStatus.BAD_REQUEST).json({
 			message: 'Bad request' // empty body!
@@ -508,7 +509,8 @@ adminRouter.put('/campaign-management/campaigns/:id', function(req, res) {
 		where: {
 			id: campaignId
 		},
-		fields: [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId', 'isPublic' ]
+		fields: [ 'titleFI', 'descriptionFI', 'titleSV', 'descriptionSV', 'titleEN', 'descriptionEN', 'categoryId',
+			'isPublic', 'visibleUntilDate' ]
 	})
 		.then((result) => {
 			if (result[0]) {

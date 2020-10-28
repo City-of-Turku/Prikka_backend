@@ -1,4 +1,6 @@
 const express = require('express');
+const sequelize = require('sequelize');
+const { Op } = require('sequelize');
 const Campaign = require('../models/campaign');
 const HttpStatus = require('http-status-codes');
 
@@ -14,7 +16,17 @@ campaignRouter.get('/campaigns', function(req, res) {
     Campaign.findAndCountAll({
         attributes: ['id', 'titleEN', 'titleFI', 'titleSV', 'descriptionEN', 'descriptionFI', 'descriptionSV',
             'categoryId', 'createdAt'],
-        where: { isPublic: true },
+        where: {
+            [Op.and]: [
+                {isPublic: true},
+                {visibleUntilDate: {
+                    [Op.or]: {
+                        [Op.eq]: null,
+                        [Op.gt]: sequelize.fn('NOW'),
+                    }
+                }}
+            ]
+        },
         order: [['createdAt', 'DESC']],
     })
         .then(campaigns => {
