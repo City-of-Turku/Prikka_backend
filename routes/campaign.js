@@ -21,7 +21,7 @@ campaignRouter.get('/campaigns', function(req, res) {
                 {isPublic: true},
                 {visibleUntilDate: {
                     [Op.or]: {
-                        [Op.eq]: null,
+                        [Op.is]: null,
                         [Op.gt]: sequelize.fn('NOW'),
                     }
                 }}
