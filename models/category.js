@@ -56,6 +56,11 @@ const Category = sequelize.define(
                 },
             },
         },
+        passivated: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            default: false
+        },
     },
     { indexes: [
             {unique:true, fields:['nameFI', 'nameSV','nameEN']}
