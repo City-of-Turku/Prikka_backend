@@ -74,9 +74,10 @@ const Campaign = sequelize.define(
         timestamps: true,
     }
 );
+/*
 Campaign.associate = function(models) {
     // User that created the campaign
     Campaign.belongsTo(models.User, { foreignKey: 'userId' });
 };
-
+*/
 module.exports = Campaign;
