@@ -12,9 +12,6 @@ const fs = require('fs');
 
 const logger = require('../config/winston');
 
-const key = fs.readFileSync('certs/localhost-key.pem');
-const cert = fs.readFileSync('certs/localhost.pem');
-
 /**
  * Get port= require (environment and store in Express.
  */
@@ -26,13 +23,8 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-if (process.env['NODE_ENV'] === 'production') {
-    logger.info('Creating HTTPS server - with certs')
-    var server = https.createServer({key, cert}, app);
-} else {
-    logger.info('Creating HTTP server - No certs')
-    var server = http.createServer(app)
-}
+logger.info('Creating HTTP server')
+const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.

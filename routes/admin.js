@@ -89,7 +89,6 @@ adminRouter.get('/auth-management/user', function(req, res) {
 		order: [['id', 'ASC']],
 	};
 
-	logger.info(filters);
 	User.findAndCountAll(filters)
 		.then(users => {
 			logger.info(`sending users to client - ${req.originalUrl} - ${req.method} - ${req.ip}`);

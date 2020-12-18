@@ -1,6 +1,6 @@
 {
     "development": {
-        "username": "prikka",
+        "username": "root",
         "password": "password",
         "database": "myturkumemories_db",
         "options": {
@@ -10,7 +10,7 @@
         }
     },
     "test": {
-        "username": "prikka",
+        "username": "root",
         "password": "password",
         "database": "myturkumemories_db",
         "options": {
@@ -20,7 +20,7 @@
         }
     },
     "production": {
-        "username": "prikka",
+        "username": "root",
         "password": "password",
         "database": "myturkumemories_db",
         "options": {

@@ -1,52 +1,68 @@
-## Backend Setup
 
--   Clone this repo
--   `cd TurkuMemories`
--   `npm install`
--   `npm start`  
-    Make sure you have nodemon installed `npm install nodemon -g`
+# Prikka application
+The Prikka application is used for gathering memories, events and stories about the City of Turku. The application consists of prikka_backend and prikka_ui.  
 
-## Changelog:
+This project was started and mainly done as a Capstone-project at Turun AMK. The first version of the Prikka application does only work in browsers in a good-size monitor.
+(första versionen av Prikka programmet är inte gjort för att användas på telefoner eller paddor) 
 
--   20/03/2020:
+## Backend
 
-### Memory model updated to match database column
+Express js is used with sequelize to handle database interactions, which consists of storing and fetching memories and userdata.   
+User authentication is done with auth0, but will be transferred to Turku tunnistamo in the future. 
 
--   'content' field replaced with 'description'
+### Setup 
+Setting up a development environment.
 
-### (GET) /categories API moved to correct route
+1. Clone repo
+   
+2. Make sure you have installed node v10 (or newer).  
+   Install node dependencies.
 
--   (GET) /categories should not be in memories API tree
--   Moved from routes/memory.js to routes/category.js
-    Don't call with '/memory-management/categories' but '/category-management/categories'
+   ```
+   cd backend
+   npm install
+   ```
+3. You will also need a .env file   
+   Example .env file, for local development
+    ```
+    AUTH0_DOMAIN=
+    AUTH0_CLIENT_ID=
+    AUTH0_CLIENT_SECRET=
+    AUTH0_CALLBACK_URL=http://localhost:4500/api/auth-management/callback
+    LOGIN_REDIRECT=/api/auth-management/login
+    FRONTEND_LOCATION=http://localhost:3000/
+    PORT=4500
+    SESSION_SECRET=fafafafafafafafafa
+    ```
 
-### Removed 'alter' argument from db.sync() call
+4. A database is needed before starting. Docker is recommended to use, but use anything you want to host your local DB.  
+Example of docker-compose.yml for a mysql database setup for this project.
 
--   2020-06-07: https://github.com/sequelize/sequelize/issues/9653
-    Changed to db.sync({alter : true}) , check in category.js how indexes should be created in order
-	to not get the duplicate error.
--   db.sync({alter : true}) created duplicate key at each nodemon restart
--   Changed to db.sync(), please use mock-data.sql script in teams to import schema and mock data
+   ```
+   version: '3'
+   services:
+     mysql:
+       image: mariadb
+       container_name: myturkumemories_db
+       ports:
+         - 3306:3306
+       environment:
+         MYSQL_DATABASE: 'myturkumemories_db'
+         MYSQL_ROOT_PASSWORD: password
+       volumes:
+         - ./db-data/mysql-datadir:/var/lib/mysql
+   
+   ```
+- Database settings is configured in config/config.json
+ 
+5. Make sure you have nodemon installed  
+   
+   ```
+   npm install nodemon -g
+   ```
+   
+6. Start it
+    ```
+   npm start
+   ```
 
-
-*   12/01/2020 :
-
-    -   Added folder 'my_turku_memories_nodejs'
-
-        -   NodeJS/Express server countaining all the following APIs:
-        -   -> SignUp
-        -   -> Login
-        -   -> Logout
-        -   -> Forgot Password
-        -   -> Add memories
-        -   -> Remove Memories
-        -   -> Add/Remove favorite
-
-    -   Used with mongoDB for Dev.
-
-    -   Go in the folders to see respective README.md.
-
-*   10/01/2020 :
-
-    -   AntiiRae First commit
-    -   Added folder 'TurkuMemoriesBackend'
