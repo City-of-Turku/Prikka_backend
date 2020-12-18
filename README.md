@@ -2,8 +2,8 @@
 # Prikka application
 The Prikka application is used for gathering memories, events and stories about the City of Turku. The application consists of prikka_backend and prikka_ui.  
 
-This project was started and mainly done as a Capstone-project at Turun AMK. The first version of the Prikka application does only work in browsers in a good-size monitor.
-(första versionen av Prikka programmet är inte gjort för att användas på telefoner eller paddor) 
+This project was started and mainly done as a Capstone-project at Turun AMK. The first version of the Prikka application is not optimized for mobile use.
+
 
 ## Backend
 
