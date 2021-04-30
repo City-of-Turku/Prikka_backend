@@ -12,9 +12,7 @@ const multer = require('multer');
 const fs = require('fs');
 var _ = require('lodash');
 
-// logger
 const logger = require('../config/winston');
-
 const secured = require('../middleware/secured');
 
 const upload = multer({
@@ -198,7 +196,8 @@ memoryRouter.get('/memories/:id', function(req, res) {
  */
 memoryRouter.put('/memories/:id', upload.single("file"), secured(), function(req, res) {
     let memoryId = req.params.id;
-    let updatedMemory = _.pick(req.body, [ 'title', 'categoryId', 'description', 'position', 'photographer', 'whenIsPhotoTaken', 'whereIsPhotoTaken' ]);
+    let updatedMemory = _.pick(req.body, [ 'title', 'categoryId', 'description', 'position', 'photographer',
+        'whenIsPhotoTaken', 'whereIsPhotoTaken', 'sharePhotoInfo' ]);
     let userId = req.user.id;
     const file = req.file;
     const position = JSON.parse(updatedMemory['position']);
@@ -215,7 +214,8 @@ memoryRouter.put('/memories/:id', upload.single("file"), secured(), function(req
             id: memoryId,
             userId: userId
         },
-        fields: [ 'title', 'categoryId', 'description', 'position', 'photo', 'photographer', 'whenIsPhotoTaken', 'whereIsPhotoTaken' ]
+        fields: [ 'title', 'categoryId', 'description', 'position', 'photo', 'photographer', 'whenIsPhotoTaken',
+            'whereIsPhotoTaken', 'sharePhotoInfo' ]
     })
         .then((result) => {
             if (result[0]) {
