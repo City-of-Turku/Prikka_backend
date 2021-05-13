@@ -81,6 +81,11 @@ const Memory = sequelize.define(
         },
         activeReports: {
             type: DataTypes.INTEGER.UNSIGNED.ZEROFILL,
+        },
+        sharePhotoInfo: {
+            type: DataTypes.BOOLEAN,
+            allowNull: true,
+            default: false
         }
     },
     {
